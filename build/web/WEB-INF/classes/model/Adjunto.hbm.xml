@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 20-jun-2017 17:28:53 by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="model.Adjunto" table="adjunto" catalog="oc">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity"></generator>
+        </id>
+        <many-to-one name="idea" class="model.Idea" fetch="select" lazy="false">
+            <column name="idea" not-null="true" />
+        </many-to-one>
+        <many-to-one name="itemCatalogo" class="model.ItemCatalogo" fetch="select" lazy="false">
+            <column name="tipo" />
+        </many-to-one>
+        <property name="nombre" type="string">
+            <column name="nombre" length="200" />
+        </property>
+        <property name="register" type="timestamp">
+            <column name="register" length="19" />
+        </property>
+    </class>
+</hibernate-mapping>
