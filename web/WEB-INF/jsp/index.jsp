@@ -3,16 +3,19 @@
     Created on : 04-ene-2017, 9:39:59
     Author     : TAWSBC
 --%>
-<!DOCTYPE html>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <%@include file="/WEB-INF/jsp/includes.jsp" %>
 
+<!DOCTYPE html>
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">     
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="shortcut icon" href="${pageContext.request.contextPath}/recursos/img/utpl.ico" type="image/png">
+        
         <title>Ideas</title>
-        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
         <style>
             .favorito {
@@ -27,451 +30,54 @@
                 color: green;
             }
         </style>
-        <style>
-            @import url(http://fonts.googleapis.com/css?family=Old+Standard+TT:400,700);
-            [data-notify="container"][class*="alert-pastel-"] {
-                background-color: rgb(255, 255, 238);
-                border-width: 0px;
-                border-left: 15px solid rgb(255, 240, 106);
-                border-radius: 0px;
-                box-shadow: 0px 0px 5px rgba(51, 51, 51, 0.3);
-                font-family: 'Old Standard TT', serif;
-                letter-spacing: 1px;
-            }
-            [data-notify="container"].alert-pastel-info {
-                border-left-color: rgb(255, 179, 40);
-            }
-            [data-notify="container"].alert-pastel-danger {
-                border-left-color: rgb(255, 103, 76);
-            }
-            [data-notify="container"][class*="alert-pastel-"] > [data-notify="title"] {
-                color: rgb(80, 80, 57);
-                display: block;
-                font-weight: 700;
-                margin-bottom: 5px;
-            }
-            [data-notify="container"][class*="alert-pastel-"] > [data-notify="message"] {
-                font-weight: 400;
-            }
-        </style>
+
+        <!-- jQuery 3.2.1 -->
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/bootstrap/css/bootstrap.min.css">
+        <script type="text/javascript" src="${pageContext.request.contextPath}/recursos/js/jquery.js"></script>
+        <script type="text/javascript" src="${pageContext.request.contextPath}/recursos/js/bootstrap.min.js"></script>
         <script>
-            function busqueda_enter() {
-                if ($('#busqueda').val().trim() != '') {
-                    $('#span_esperar').show();
-                    $('#span_total').show();
-                    buscar(true, page, rows, 'results', false);
+            $.ajax({
+                url: 'http://serendipity.utpl.edu.ec/slider-v1/slider?id=10&tipo=responsive',
+                type: "get",
+                dataType: "json",
+                success: function (msg) {
+                    document.getElementById("div_carrusel").innerHTML = msg;
+                },
+                error: function (textStatus) {
+                    alert("Error leyendo datos."+textStatus);
                 }
-            }
-
-            function generarPaginacion(total_resultados, pagina, rows) {
-                $('#pp').pagination({
-                    total: total_resultados,
-                    pageSize: 10,
-                    onSelectPage: function (pageNumber, pageSize) {
-//                        alert(pageNumber + " - " + pageSize);
-//                        $('#pp').panel('refresh', 'show_content.php?page=' + pageNumber);
-                    }
-                });
-            }
-            function notificar(icon, title, message, type) {
-                $.notify({
-                    icon: icon,
-                    title: title,
-                    message: message
-                }, {
-                    type: type,
-                    delay: 5000,
-                    allow_dismiss: true,
-                    newest_on_top: true,
-                    animate: {
-                        enter: 'animated fadeInRight',
-                        exit: 'animated fadeOutRight'
-                    },
-                    template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
-                            '<span data-notify="title">{1}</span>' +
-                            '<span data-notify="message">{2}</span>' +
-                            '</div>'
-                });
-            }
-
-            function obtenerDetalle(idIdea) {
-                var idea = callWS('${pageContext.request.contextPath}/buscarporid.htm', 'GET', 'JSON', {id_idea: parseInt(idIdea)});
-                $('#mdl_body').text('');
-                var html =
-                        //                        '<span class="pull-right"><small><strong class="bg-primary" style="border-radius:21px; padding: 0px 5px 0px 5px;"><em>' + idea.nombre + '</em></strong></small></span></div>' +
-                        '<table id="tblNodeInfo" class="table table-bordered" style="width:100%;"> ' +
-                        '<tbody> ' +
-                        '<tr>' +
-                        '<td colspan="2">' +
-                        '<label class="label label-default" style="float:right;">' + idea.convocatoria.nombre + '</label>' +
-                        '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td colspan="2">' +
-                        '<a href="${pageContext.request.contextPath}/bancoideas/' + idea.imagen + '" target="_blank" style="float:left;"> <img   height = "50px" width = "100px" src="' + '${pageContext.request.contextPath}/bancoideas/' + idea.imagen + '" > </a>' +
-                        '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td colspan="2" align="center">' +
-                        '<label><strong style="text-transform:uppercase;">' + idea.nombre + '</strong></label>' +
-                        '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> DescripciÃ³n: </td>' +
-                        '<td width="70%"> ' + idea.descripcion + '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-//                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Tipo </td>' +
-//                        '<td width="70%">' + idea.itemCatalogoByTipo.nombre + '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Estado </td>' +
-                        '<td width="70%">' + idea.itemCatalogoByEstado.nombre + '</td>' +
-                        '</tr>' +
-                        '<tr>' +
-//                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> ClasificaciÃ³n CIIU </td>' +
-//                        '<td width="70%">' + idea.ciiu.nombre + '</td>' +
-                        '</tr>';
-//                if (idea.facebook != '' || idea.youtube != '' || idea.twitter != '') {
-//                    html += '<tr>' +
-//                            '<td colspan="2"> <strong>* MEDIA</strong> </td>' +
-//                            '</tr>';
-//                }
-//                if (idea.facebook != '') {
-//                    html += '<tr>' +
-//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link facebook </td>' +
-//                            '<td width="70%"><a href="' + idea.facebook + '" target="_blank">' + idea.facebook + '</a></td>' +
-//                            '</tr>';
-//                }
-//                if (idea.youtube != '') {
-//                    html += '<tr>' +
-//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link youtube </td>' +
-//                            '<td width="70%">' + idea.youtube + '</td>' +
-//                            '</tr>';
-//                }
-//                if (idea.twitter != '') {
-//                    html += '<tr>' +
-//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link twitter</td>' +
-//                            '<td width="70%">' + idea.twitter + '</td>' +
-//                            '</tr>';
-//                }
-                '</tbody>' +
-                        '</table>';
-                $('#mdl_body').append(html);
-//            $('#mdl_modal').modal('show');
-                $('#mdl_modal').modal('show');
-            }
-
-            function confirmar(id, us) {
-                var tbl = '<form action="eliminar.htm" method="POST">' +
-                        '<input type="hidden" id="us" name="us" value="' + us + '">' +
-                        '<input type="hidden" id="id_idea" name="id_idea" value="' + id + '">' +
-                        '<button class="btn btn-danger"> <span class="glyphicon glyphicon-remove"> eliminar</span></button>' +
-                        '</form>';
-                $('#mdl_body').html(tbl);
-                $('#mdl_label').html('Confirme que desea eliminar el registro seleccionado');
-                $('#mdl_modal').modal('show');
-            }
-
-            function confirmar_evaluar(idea) {
-                var tbl = '<form action="evaluar.htm" method="POST">' +
-                        '<input type="hidden" id="us" name="us" value="' + ${us} + '">' +
-                        '<input type="hidden" id="id_idea" name="id_idea" value="' + idea + '">' +
-                        '<table class="table table-condensed table-striped">' +
-                        '<tr>' +
-                        '<td>Comentario</td><td><textarea id="comentario" name="comentario" style="width:100%;"></textarea></td>' +
-                        '</tr>' +
-                        '</table>' +
-                        '<button class="btn btn-success"> <span class="glyphicon glyphicon-ok"> Aceptar</span></button>' +
-                        '</form>';
-                $('#mdl_body').html(tbl);
-                $('#mdl_label').html('Confirme que desea evaluar la idea seleccionada');
-                $('#mdl_modal').modal('show');
-            }
-//            function eliminar_confirmar(id, nombre, op) {
-//                var tbl = '<form action="eliminar.htm" method="POST">' +
-//                        '<input type="hidden" id="us" name="us" value="' + us + '">' +
-//                        '<input type="hidden" id="id_idea" name="id_idea" value="' + id + '">' +
-//                        '<button class="btn btn-danger"> <span class="glyphicon glyphicon-remove"> eliminar</span></button>' +
-//                        '</form>';
-//                $('#mdl_body').html(tbl);
-//                $('#mdl_label').html('Confirme que desea eliminar el registro seleccionado');
-//                $('#mdl_modal').modal('show');
-//            }
+            });
         </script>
+       
     </head>
 
     <body>
-        <div id="styles">
-            <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/gray/easyui.css">
-            <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
-            <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/color.css">
 
-            <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/prettify/prettify.css">
-        </div>
-        <!--SECCIÃ“N DE CABECERA--> 
-        <nav class="navbar navbar-default" style="background-color: #fff;border:none;border-bottom:5px solid #ff9100;margin-bottom: 0px;border-radius:0;">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">T oggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <!--<img src="${pageContext.request.contextPath}/recursos/img/serendipity_social.png" alt=""  width="200px;" style="padding: 5px 0px;"/>-->
-                </div>
-                <div id="navbar" class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav navbar-left">
-                        <!--<li> <p style="font-size: 24px;">Banco de Ideas</p> </li>-->
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right" style="padding: 5px 0px; font-size: 16px;">
-                        <c:if test="${empty nombre}">
-                            <li>
-                                <button class="btn btn-sm btn-primary" onclick="$('#mdl_login').modal('show');
-                                        $('#username').focus();"><strong>Ingresar</strong> <span class="glyphicon glyphicon-log-in"></span> </button> &nbsp;&nbsp;
-                            </li>
-                            <li>
-                                <!--<button class="btn btn-sm btn-info" onclick="$('#mdl_register').modal('show')"><strong>Register</strong> <span class="glyphicon glyphicon-log-in"></span> </button>--> 
-                            </li>
-                        </c:if>
-                        <c:if test="${!empty nombre}">
-                            <c:if test="${!empty menu}">
-                                <li>
-                                    <div class="row" id="div_menu" style="padding-left: 15px; margin-left: 5px; margin-right: 5px;"> 
-                                        <div class="col-md-12">
-                                            <c:forEach items="${menu}" var="m">
-                                                <div class="btn-group">
-                                                    <a id="dLabel"  data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
-                                                        <span class="${m.titulo.icono}" aria-hidden="true"></span> ${m.titulo.nombre}
-                                                        <span class="caret"></span>
-                                                    </a>
-                                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                                        <c:forEach items="${m.items}" var="it">
-                                                            <li> <a href="${it.url}?us=${us}&conv=1"> <span class="${it.icono}" aria-hidden="true"></span> ${it.nombre} </a> </li>
-                                                            </c:forEach>
-                                                    </ul>
-                                                </div>
-                                            </c:forEach>
-                                        </div>
-                                    </div>
-                                </li>
-                            </c:if>
-                            <li>
-                                <c:if test = "${nombre != null}">
-<!--                                    <form action="idea_index.htm?us=${us}&nueva=true" method="GET">-->
-                                    <button class="btn btn-sm btn-primary" onclick="$('#mdl_opcion').modal('show');"><strong>Nueva idea</strong> <span class="glyphicon glyphicon-plus"></span> </button> &nbsp;&nbsp;
-                                    <!--</form>-->
-<!--                                    <a class="btn btn-sm btn-primary" href="idea/index.htm?us=${us}"> <span class="glyphicon glyphicon-plus"></span> Nueva Idea </a>-->
-                                    <br><br>
-                                </c:if>
-                                <!--<button class="btn btn-sm btn-primary" onclick="$('#mdl_contribucion').modal('show')"><strong>ContribuciÃ³n OER</strong> <span class="glyphicon glyphicon-plus"></span> </button> &nbsp;&nbsp;-->
-                            </li>
-                            <li>
-                                <nav class="navbar navbar-static-top">
-                                    <!-- Sidebar toggle button-->
-                                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                                        <span class="sr-only">Toggle navigation</span>
-                                    </a>
-                                    <div class="navbar-custom-menu">
-                                        <ul class="nav navbar-nav">
-                                            <!--                                            <li class="dropdown messages-menu">
-                                                                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title="Favorites">
-                                                                                                <i><span class="glyphicon glyphicon-star"></span></i>
-                                                                                                <span class="label label-success" id="span_total_fav_1">${fn:length(favoritos)}</span>
-                                                                                            </a>
-                                                                                            <ul class="dropdown-menu">
-                                                                                                <li class="header">You have <span id="span_total_fav_2">${fn:length(favoritos)}</span> resources marked as favorite</li>
-                                                                                                <li>
-                                                                                                    <ul class="menu" id="ul_recursos_fav" >
-                                            <c:forEach items="${favoritos}" var="f">
-                                                <li id="li_fav_${f.id}"> start message 
-                                                    <a style="cursor: pointer;" onclick="obtenerDetalle(${f.id})" data-toggle="modal" data-target="#mdl_modal">
-                                                        <div class="pull-left">
-                                                            <span class="glyphicon glyphicon-star"></span>
-                                                        </div>
-                                                        <h4>
-                                                ${f.titulo}
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>${f.descripcion}</p>
-                                        </a>
-                                    </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="footer"><a href="#" onclick="listar('favorites',${us});">view all</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown messages-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title="Likes">
-                                    <i><span class="glyphicon glyphicon-thumbs-up"></span></i>
-                                    <span class="label label-success" id="span_total_like_1">${fn:length(likes)} </span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="header">You have <span id="span_total_like_2">${fn:length(likes)}</span> resources marked as like</li>
-                                    <li>
-                                         inner menu: contains the actual data 
-                                        <ul class="menu" id="ul_recursos_like">
-                                            <c:forEach items="${likes}" var="l">
-                                                <li id="li_lk_${l.id}"> start message 
-                                                    <a style="cursor: pointer;" onclick="obtenerDetalle(${l.id})" data-toggle="modal" data-target="#mdl_modal">
-                                                        <div class="pull-left">
-                                                            <span class="glyphicon glyphicon-thumbs-up"></span>
-                                                        </div>
-                                                        <h4>
-                                                ${l.titulo}
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>${l.descripcion}</p>
-                                        </a>
-                                    </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="footer"><a href="#" onclick="listar('likes',${us});">view all</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown messages-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title="Tags">
-                                    <i><span class="glyphicon glyphicon-tag"></span></i>
-                                    <span class="label label-success" id="span_total_tag_1">${fn:length(tags)}</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="header">You have <span id="span_total_tag_2">${fn:length(tags)}</span> resources taged</li>
-                                    <li>
-                                         inner menu: contains the actual data 
-                                        <ul class="menu" id="ul_recursos_tag">
-                                            <c:forEach items="${tags}" var="t">
-                                                <li id="li_tag_${t.id}"> start message 
-                                                    <a style="cursor: pointer;" onclick="obtenerDetalle(${t.id})" data-toggle="modal" data-target="#mdl_modal">
-                                                        <div class="pull-left">
-                                                            <span class="glyphicon glyphicon-tags"></span>
-                                                        </div>
-                                                        <h4>
-                                                ${t.titulo}
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>${t.descripcion}</p>
-                                        </a>
-                                    </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="footer"><a href="#" onclick="listar('tags',${us});">view all</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown messages-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" data-placement="top" title="My Ideas">
-                                    <i><span class="glyphicon glyphicon-th-large"></span></i>
-                                    <span class="label label-success" id="span_total_rec_1">${fn:length(recursos)}</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="header">You have <span id="span_total_rec_2">${fn:length(recursos)} resources added</li>
-                                    <li>
-                                         inner menu: contains the actual data 
-                                        <ul class="menu" id="ul_recursos_rec">
-                                            <c:forEach items="${recursos}" var="r">         
-                                                <li id="li_rec_${r.id}"> start message 
-                                                    <a style="cursor: pointer;" onclick="obtenerDetalle(${r.id}, 1)" data-toggle="modal" data-target="#mdl_modal">
-                                                        <div class="pull-left">
-                                                            <span class="glyphicon glyphicon-th-large"></span>
-                                                        </div>
-                                                        <h4>
-                                                ${r.titulo}
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>${r.descripcion}</p>
-                                        </a>
-                                    </li>
-                                            </c:forEach>
-                                        </ul>
-                                    </li>
-                                    <li class="footer"><a href="#" onclick="listar('resources',${us});">view all</a></li>
-                                </ul>
-                            </li>-->
-
-                                            <!-- User Account: style can be found in dropdown.less -->
-                                            <li class="dropdown user user-menu">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                                    <img src="${pageContext.request.contextPath}/recursos/img/user-profile.png" class="user-image" alt="User Image">
-                                                    <span class="hidden-xs">${nombre}</span>
-                                                </a>
-                                                <ul class="dropdown-menu">
-                                                    <!-- User image -->
-                                                    <li class="user-header">
-                                                        <img src="${pageContext.request.contextPath}/recursos/img/user-profile.png" class="img-circle" alt="User Image">
-                                                        <p>
-                                                            ${nombre}
-                                                        </p>
-                                                    </li>
-                                                    <!-- Menu Body -->
-                                                    <li class="user-body">
-                                                        <div class="row">
-                                                            <div class="col-xs-4 text-center">
-                                                                <a href="#">Favoritos</a>
-                                                            </div>
-                                                            <div class="col-xs-4 text-center">
-                                                                <a href="#">Likes</a>
-                                                            </div>
-                                                            <div class="col-xs-4 text-center">
-                                                                <a href="#">Tags</a>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li class="user-footer">
-                                                        <div class="pull-left">
-                                                            <a href="#" class="btn btn-default btn-flat">Perfil</a>
-                                                        </div>
-                                                        <div class="pull-right">
-                                                            <a href="${pageContext.request.contextPath}/logout.htm" class="btn btn-default btn-flat"><strong> ( Salir ) </strong></a>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-
-                                    </div>
-                                </nav>
-                            </li>
-                        </c:if>
-
-                        <!--                        <li>
-                                                    <div class="pull-right">
-                                                        <span style="color:#999">Themes:</span>
-                                                        <select id="cb-theme" style="width:120px;height:25px"></select>
-                                                    </div>
-                                                </li>-->
-                    </ul>
-                </div><!--/.nav-collapse -->
-            </div>
-        </nav>
-
-        <!--SECCIÃ“N DE CARRUSEL-->
-        <div class="row" style="">
+        <jsp:include page="navbar.jsp"/>
+        <!--SECCIÓN DE CARRUSEL-->
+        <div class="row">
             <div id="div_carrusel" class="col-md-12"></div>
         </div>
-        <!--SECCIÃ“N DE PATROCINADORES-->  
+        <!--SECCIÓN DE PATROCINADORES-->  
         <c:if test="${empty nueva}">
-            <div id="div_patrocinadores" class="row" style="height: 100px;">
-                <div class="col-md-6 text-center center-block">
+            <div id="div_patrocinadores" class="" style="height: 100px;padding:10px;">
+                <div class="col-md-6 text-center">
                     <a style="cursor:pointer;" href="http://utpl.edu.ec/" target="_blank"> <img src="${pageContext.request.contextPath}/recursos/img/utpl.png" width="100px;"/> </a> &nbsp;&nbsp;&nbsp;
                     <a style="cursor:pointer;" href="http://smartland.utpl.edu.ec" target="_blank"> <img src="${pageContext.request.contextPath}/recursos/img/smartland.png" width="100px;"/> </a> &nbsp;&nbsp;&nbsp;
                 </div>
                 <div class="col-md-6">
-                    <p style="font-family: sans-serif;">Un sistema para emprendedores a travÃ©s del cual podrÃ¡ inscribir su idea de negocio que a su vez le permitirÃ¡ 
-                        contactar con inversionistas que impulsarÃ¡n el desarrollo de su iniciativa </p>
+                    <p>
+                        Un sistema para emprendedores a través del cual podrá inscribir su idea de negocio que a su vez le permitirá 
+                        contactar con inversionistas que impulsarán el desarrollo de su iniciativa 
+                    </p>
                 </div>
             </div>
         </c:if>
-        <!--SECCIÃ“N BUSCADOR--> 
+        <!--SECCIÓN BUSCADOR--> 
         <c:if test="${empty nueva}">
-            <div class="" style="width:100%;padding:0px 60px;">
+            <div class="" style="width:99%;padding:0px 60px;">
                 <input class="easyui-searchbox" data-options="prompt:'Search of resources...',menu:'#types',searcher:busqueda_enter" id="busqueda" name="busqueda" style="width:100%;" autofocus="autofocus">
-                <span id="span_esperar" style="margin-top: -10px;"> 
+                <span id="span_esperar" style="margin-top: -10px;display: none;"> 
                     <img src="recursos/img/rueda.gif" width="25px" style="padding-top: -20px;"/> 
                 </span>
             </div>
@@ -482,23 +88,23 @@
                 <div data-options="name:'all',iconCls:'icon-ok'">Todas</div>
             </div>
         </c:if>
-        <!--SECCIÃ“N DE CONTENIDO-->
-        <div class="easyui-layout row" style="width:100%;height:700px; background-color: gray;">
+        <!--SECCIÓN DE CONTENIDO-->
+        <div class="easyui-layout" style="height:700px;">
             <c:if test="${empty nueva}">
                 <div data-options="region:'north', border:false" >
                     <div id="span_total">
-                        <div class="row">
+
                             <div class="col-md-3">
                                 <span style="padding:10px 60px;">Results Found <span class="badge" id="total"></span> </span>
                             </div>
                             <div class="col-md-3">
                                 <div class="row" id="download"> </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5 text-right">
                                 <div id="pp" class="easyui-pagination" data-options="total:0"></div>
-                                <span id="span_page" class="pull-right"></span>
+                                <span id="span_page"></span>
                             </div>
-                        </div>
+
                     </div>
                 </div>
             </c:if>
@@ -561,7 +167,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 15%;"> <label for="nombre">TÃ­tulo</label> </td>
+                                            <td style="width: 15%;"> <label for="nombre">Título</label> </td>
                                             <td style="width: 85%;" colspan="3"> <input type="text" id="nombre" name="nombre" value="${idea.nombre}" style="width: 98%;" required> *</td>
                                         </tr>
                                         <tr>
@@ -576,7 +182,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 15%;"> <label for="descripcion">DescripciÃ³n</label> </td>
+                                            <td style="width: 15%;"> <label for="descripcion">Descripción</label> </td>
                                             <td style="width: 85%;" colspan="3"> <input type="text" id="descripcion" name="descripcion" value="${idea.descripcion}" style="width: 98%;" required> *</td>
                                         </tr>
                                         <tr>
@@ -675,7 +281,7 @@
                                         <div style="position:absolute;bottom:5px;right:10px;">
                                             <div style="float: right; padding-right: 10px;" >
                                                 <a title="detalle" class="btn-sm btn-primary" onclick="obtenerDetalle(${idea.id})" style="cursor:pointer;"> <span class="glyphicon glyphicon-search"></span></a>
-                                                <!--mientras la idea no sea evaluada se podrÃ¡ eliminar-->
+                                                <!--mientras la idea no sea evaluada se podrá eliminar-->
                                                 <c:if test = "${idea.itemCatalogoByEstado.id == 7}">
                                                     <a title="editar" class="btn-sm btn-info" href="${pageContext.request.contextPath}/idea_index.htm?us=${us}&id_idea=${idea.id}&nueva=true&opcion=${idea.tipoIdea}"> <span class="glyphicon glyphicon-pencil"></span>  </a>  
                                                     <a title="eliminar" class="btn-sm btn-danger" style="cursor:pointer;" onclick="confirmar(${idea.id},${idea.usuario.id});"><span class="glyphicon glyphicon-remove" ></span></a>
@@ -702,10 +308,10 @@
                                     <tr>
                                         <td> 
                                             <c:if test = "${idea.id == null}">
-                                                <a href="idea_index.htm?us=${us}&id_idea=${idea.id}&nueva=true&opcion=${idea.tipoIdea}" style="cursor:pointer;"> <span class="badge">1</span> InformaciÃ³n de la Idea</a> 
+                                                <a href="idea_index.htm?us=${us}&id_idea=${idea.id}&nueva=true&opcion=${idea.tipoIdea}" style="cursor:pointer;"> <span class="badge">1</span> Información de la Idea</a> 
                                             </c:if>
                                             <c:if test = "${idea.id != null}">
-                                                <a href="idea_index.htm?us=${us}&id_idea=${idea.id}&nueva=true&opcion=${idea.tipoIdea}" style="cursor:pointer;"> <span class="badge">1</span> InformaciÃ³n de la Idea <span class="glyphicon glyphicon-ok pull-right"></span> </a> 
+                                                <a href="idea_index.htm?us=${us}&id_idea=${idea.id}&nueva=true&opcion=${idea.tipoIdea}" style="cursor:pointer;"> <span class="badge">1</span> Información de la Idea <span class="glyphicon glyphicon-ok pull-right"></span> </a> 
                                             </c:if>
                                         </td>
                                     </tr>
@@ -785,7 +391,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="width: 15%;"> <label for="nombre">TÃ­tulo</label> </td>
+                                                    <td style="width: 15%;"> <label for="nombre">Título</label> </td>
                                                     <td style="width: 85%;" colspan="3"> <input type="text" id="nombre" name="nombre" value="${idea.nombre}" style="width: 98%;" required> *</td>
                                                 </tr>
                                                 <tr>
@@ -814,7 +420,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="width: 15%;"> <label for="descripcion">DescripciÃ³n</label> </td>
+                                                    <td style="width: 15%;"> <label for="descripcion">Descripción</label> </td>
                                                     <td style="width: 85%;" colspan="3"> <input type="text" id="descripcion" name="descripcion" value="${idea.descripcion}" style="width: 98%;" required> *</td>
                                                 </tr>
                                                 <tr>
@@ -834,7 +440,7 @@
                                                     <td style="width: 85%;" colspan="3"> <input type="text" id="kw" name="kw" value="${idea.kw}" data-role="tagsinput" placeholder="Ingrese palabras clave" style="width: 100% !important;" required> *</td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="width: 15%;"> <label for="ciiu">ClasificaciÃ³n CIIU</label> </td>
+                                                    <td style="width: 15%;"> <label for="ciiu">Clasificación CIIU</label> </td>
                                                     <td style="width: 85%;" colspan="3"> 
                                                         <input id="ciiu" name="ciiu" value='${idea.ciiu.nombre}'
                                                                class="easyui-tagbox" label="" style="width:100%" data-options="
@@ -847,9 +453,9 @@
                                                                hasDownArrow: true,
                                                                multiple: false, 
                                                                maximumSelectionSize: 1,
-                                                               prompt: 'Seleccione una clasificaciÃ³n'
+                                                               prompt: 'Seleccione una clasificación'
                                                                " />
-                                                        <!--<input id="ciiu" name="ciiu" type="text" class="form-control" style="width: 100% !important;" data-role="tagsinput" value="" placeholder="Ingrese categorÃ­a ciiu" />-->
+                                                        <!--<input id="ciiu" name="ciiu" type="text" class="form-control" style="width: 100% !important;" data-role="tagsinput" value="" placeholder="Ingrese categoría ciiu" />-->
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -939,7 +545,7 @@
                                             <tr>
                                                 <td colspan="2"> 
                                                     Buscar por:
-                                                    <input type="radio" name="participante" value="id"> IdentificaciÃ³n
+                                                    <input type="radio" name="participante" value="id"> Identificación
                                                     <input type="radio" name="participante" value="us"> Username
                                                 </td>
                                             </tr> 
@@ -959,7 +565,7 @@
                                                 </td> 
                                             </tr> 
                                             <tr>
-                                                <td style="width: 15%;"> <label for="funcion">FunciÃ³n:</label> </td>
+                                                <td style="width: 15%;"> <label for="funcion">Función:</label> </td>
                                                 <td style="width: 85%;"> 
                                                     <select id="funcion" name="funcion" class="bg-info" style="size:50px;" required>
                                                         <c:forEach items="${funcion}" var="item">
@@ -980,7 +586,7 @@
                                             <tr>
                                                 <th></th>
                                                 <th>Participante</th>
-                                                <th>FunciÃ³n</th>
+                                                <th>Función</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1002,7 +608,7 @@
                                 </c:if>
 
                                 <c:if test = "${fase == 'estadogestacion'}">
-                                    <p style="padding-left: 10px;"><span class="badge">3.</span><strong>&nbsp;&nbsp;Estado de GestaciÃ³n de la Idea</strong></p>  
+                                    <p style="padding-left: 10px;"><span class="badge">3.</span><strong>&nbsp;&nbsp;Estado de Gestación de la Idea</strong></p>  
                                     <form action="estadogestacion.htm" method="POST">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
                                         <table class="table" style="width: 100%;">
@@ -1032,16 +638,16 @@
                                 </c:if>
 
                                 <c:if test = "${fase == 'publicacion'}">
-                                    <p style="padding-left: 10px;"><span class="badge">4.</span><strong>&nbsp;&nbsp;FinalizaciÃ³n de la idea</strong></p>  
+                                    <p style="padding-left: 10px;"><span class="badge">4.</span><strong>&nbsp;&nbsp;Finalización de la idea</strong></p>  
                                     <form action="publicar.htm" method="POST">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
-                                        Al finalizar la idea, podrÃ¡ ser evaluada por el agente evaluador.
+                                        Al finalizar la idea, podrá ser evaluada por el agente evaluador.
                                         <br><br>
                                         <c:if test = "${idea.publicar == false}">
                                             <button class="btn btn-primary" > <span class="glyphicon glyphicon-ok"></span> Finalizar </button>
                                         </c:if>
                                         <c:if test = "${idea.publicar == true}">
-                                            <label class="bg-success">FinalizaciÃ³n exitosa</label>
+                                            <label class="bg-success">Finalización exitosa</label>
                                         </c:if>
                                     </form>
                                 </c:if>
@@ -1051,14 +657,30 @@
                 </div>
             </div>
 
-            <div data-options="region:'south'"  style="width:100%;"></div>
+            <div data-options="region:'south'" style="width:100%;"></div>
 
         </div>
-        <footer>
-            <p>Â© 2017 Except where otherwise noted, content on this site is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons Attribution 4.0 International license</a>. Icons by The <a href="http://www.utpl.edu.ec" target="_blank">UTPL</a></p>
-        </footer>
+        <div class="row" style="height: 30px; background: #fafafa;"></div>
+        <footer style="border-top:5px solid #ff9100;">
+            <div class="row">
+                <div class="col-md-3 text-center center-block"">
+                    <!--SECCIÓN DE PATROCINADORES-->
+                    <a style="cursor:pointer;" href="http://utpl.edu.ec/" target="_blank"> <img src="${pageContext.request.contextPath}/recursos/img/utpl.png" width="100px;"/> </a> 
+                </div>
+                <div class="col-md-5">
+                    <p class="text-justify">© 2017 Except where otherwise noted, content on this site is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons Attribution 4.0 International license</a>. Icons by The <a href="https://serendipity.utpl.edu.ec" target="_blank">Serendpity</a> Project.</p>
+                </div>
+                <div class="col-md-2"></div>
 
-        <!-- Modal -->
+                <div class="col-md-2 text-center center-block">
+                    <div style="margin-top:10px;">
+                        © Innovation 
+                    </div> 
+
+                </div>
+            </div>    
+        </footer>    
+        <!-- Modal  -->
         <div class="modal fade" id="mdl_register" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -1105,7 +727,7 @@
                                                                 $('#btnNuevo').attr('disabled', false)
                                                             } else {
                                                                 $('#btnNuevo').attr('disabled', true)
-                                                            }"> Acepto los <a href="#">tÃ©rminos</a>
+                                                            }"> Acepto los <a href="#">términos</a>
                                                 </label>
                                             </div>
                                         </div>
@@ -1145,7 +767,7 @@
                             <form:form action="${pageContext.request.contextPath}/auth.htm" modelAttribute="login" method="POST">  
                                 <form:input type="text" path="username" autocomplete="true" placeholder="usuario" required=""  style="padding-top:5px;"/>
                                 <br>
-                                <form:input type="password" path="password" placeholder="contraseÃ±a" required="" />
+                                <form:input type="password" path="password" placeholder="contraseña" required="" />
                                 <br><br>
                                 <button class="btn btn-sm btn-primary"><strong>Ingresar</strong> <span class="glyphicon glyphicon-log-in"></span> </button> 
                                 <hr>
@@ -1168,14 +790,14 @@
             </div>
         </div>
 
-        <!-- Modal opciÃ³n -->
+        <!-- Modal opción -->
         <div id="mdl_opcion" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         <label>Tipo de Idea</label>
-                        <p>Fase 1: para registrar ideas de reciente creaciÃ³n</p>
+                        <p>Fase 1: para registrar ideas de reciente creación</p>
                         <p>Fase 2: para registrar ideas consolidadas</p>
 
                     </div>
@@ -1194,13 +816,166 @@
                 </div>
             </div>
         </div>
-
+       
+             
+        <jsp:include page="modal.jsp"/>
+        
+        
         <jsp:include page="header.jsp"/>
-        <script type="text/javascript" src="http://www.jeasyui.com/prettify/prettify.js"></script>
-        <script type="text/javascript" src="http://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
-
+        
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/recursos/easyui/css/easyui.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/recursos/easyui/css/icon.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/recursos/easyui/css/color.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/recursos/easyui/css/prettify.css">
+        <script type="text/javascript" src="${pageContext.request.contextPath}/recursos/easyui/js/jquery.easyui.min.js"></script>       
+        <script type="text/javascript" src="${pageContext.request.contextPath}/recursos/easyui/js/prettify.js"></script>
+        
         <!--<script type="text/javascript" src="${pageContext.request.contextPath}/recursos/js/util.js"></script>-->
+        <script>
+            function busqueda_enter() {
+                if ($('#busqueda').val().trim() != '') {
+                    $('#span_esperar').show();
+                    $('#span_total').show();
+                    buscar(true, page, rows, 'results', false);
+                }
+            }
 
+            function generarPaginacion(total_resultados, pagina, rows) {
+                $('#pp').pagination({
+                    total: total_resultados,
+                    pageSize: 10,
+                    onSelectPage: function (pageNumber, pageSize) {
+//                        alert(pageNumber + " - " + pageSize);
+//                        $('#pp').panel('refresh', 'show_content.php?page=' + pageNumber);
+                    }
+                });
+            }
+            function notificar(icon, title, message, type) {
+                $.notify({
+                    icon: icon,
+                    title: title,
+                    message: message
+                }, {
+                    type: type,
+                    delay: 5000,
+                    allow_dismiss: true,
+                    newest_on_top: true,
+                    animate: {
+                        enter: 'animated fadeInRight',
+                        exit: 'animated fadeOutRight'
+                    },
+                    template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+                            '<span data-notify="title">{1}</span>' +
+                            '<span data-notify="message">{2}</span>' +
+                            '</div>'
+                });
+            }
+
+            function obtenerDetalle(idIdea) {
+                var idea = callWS('${pageContext.request.contextPath}/buscarporid.htm', 'GET', 'JSON', {id_idea: parseInt(idIdea)});
+                $('#mdl_body').text('');
+                var html =
+                        //                        '<span class="pull-right"><small><strong class="bg-primary" style="border-radius:21px; padding: 0px 5px 0px 5px;"><em>' + idea.nombre + '</em></strong></small></span></div>' +
+                        '<table id="tblNodeInfo" class="table table-bordered" style="width:100%;"> ' +
+                        '<tbody> ' +
+                        '<tr>' +
+                        '<td colspan="2">' +
+                        '<label class="label label-default" style="float:right;">' + idea.convocatoria.nombre + '</label>' +
+                        '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td colspan="2">' +
+                        '<a href="${pageContext.request.contextPath}/bancoideas/' + idea.imagen + '" target="_blank" style="float:left;"> <img   height = "50px" width = "100px" src="' + '${pageContext.request.contextPath}/bancoideas/' + idea.imagen + '" > </a>' +
+                        '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td colspan="2" align="center">' +
+                        '<label><strong style="text-transform:uppercase;">' + idea.nombre + '</strong></label>' +
+                        '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Descripción: </td>' +
+                        '<td width="70%"> ' + idea.descripcion + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+//                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Tipo </td>' +
+//                        '<td width="70%">' + idea.itemCatalogoByTipo.nombre + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Estado </td>' +
+                        '<td width="70%">' + idea.itemCatalogoByEstado.nombre + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+//                        '<td class="bg-primary" style="background-color:#003F72; color:white;"> Clasificación CIIU </td>' +
+//                        '<td width="70%">' + idea.ciiu.nombre + '</td>' +
+                        '</tr>';
+//                if (idea.facebook != '' || idea.youtube != '' || idea.twitter != '') {
+//                    html += '<tr>' +
+//                            '<td colspan="2"> <strong>* MEDIA</strong> </td>' +
+//                            '</tr>';
+//                }
+//                if (idea.facebook != '') {
+//                    html += '<tr>' +
+//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link facebook </td>' +
+//                            '<td width="70%"><a href="' + idea.facebook + '" target="_blank">' + idea.facebook + '</a></td>' +
+//                            '</tr>';
+//                }
+//                if (idea.youtube != '') {
+//                    html += '<tr>' +
+//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link youtube </td>' +
+//                            '<td width="70%">' + idea.youtube + '</td>' +
+//                            '</tr>';
+//                }
+//                if (idea.twitter != '') {
+//                    html += '<tr>' +
+//                            '<td class="bg-primary" style="background-color:#003F72; color:white;"> link twitter</td>' +
+//                            '<td width="70%">' + idea.twitter + '</td>' +
+//                            '</tr>';
+//                }
+                '</tbody>' +
+                        '</table>';
+                $('#mdl_body').append(html);
+//            $('#mdl_modal').modal('show');
+                $('#mdl_modal').modal('show');
+            }
+
+            function confirmar(id, us) {
+                var tbl = '<form action="eliminar.htm" method="POST">' +
+                        '<input type="hidden" id="us" name="us" value="' + us + '">' +
+                        '<input type="hidden" id="id_idea" name="id_idea" value="' + id + '">' +
+                        '<button class="btn btn-danger"> <span class="glyphicon glyphicon-remove"> eliminar</span></button>' +
+                        '</form>';
+                $('#mdl_body').html(tbl);
+                $('#mdl_label').html('Confirme que desea eliminar el registro seleccionado');
+                $('#mdl_modal').modal('show');
+            }
+
+            function confirmar_evaluar(idea) {
+                var tbl = '<form action="evaluar.htm" method="POST">' +
+                        '<input type="hidden" id="us" name="us" value="' + ${us} + '">' +
+                        '<input type="hidden" id="id_idea" name="id_idea" value="' + idea + '">' +
+                        '<table class="table table-condensed table-striped">' +
+                        '<tr>' +
+                        '<td>Comentario</td><td><textarea id="comentario" name="comentario" style="width:100%;"></textarea></td>' +
+                        '</tr>' +
+                        '</table>' +
+                        '<button class="btn btn-success"> <span class="glyphicon glyphicon-ok"> Aceptar</span></button>' +
+                        '</form>';
+                $('#mdl_body').html(tbl);
+                $('#mdl_label').html('Confirme que desea evaluar la idea seleccionada');
+                $('#mdl_modal').modal('show');
+            }
+//            function eliminar_confirmar(id, nombre, op) {
+//                var tbl = '<form action="eliminar.htm" method="POST">' +
+//                        '<input type="hidden" id="us" name="us" value="' + us + '">' +
+//                        '<input type="hidden" id="id_idea" name="id_idea" value="' + id + '">' +
+//                        '<button class="btn btn-danger"> <span class="glyphicon glyphicon-remove"> eliminar</span></button>' +
+//                        '</form>';
+//                $('#mdl_body').html(tbl);
+//                $('#mdl_label').html('Confirme que desea eliminar el registro seleccionado');
+//                $('#mdl_modal').modal('show');
+//            }
+        </script>
 
         <script>
                             function callWS(url, type, dataType, data) {
@@ -1263,24 +1038,11 @@
                             $(document).ready(function () {
                                 $('#span_esperar').hide();
                                 if (usr == -1) {
-                                    cargar();
+                                    //cargar();
+                                    console.log('cargar');
                                 }
                             });
-                            function cargar() {
-                                $.ajax({
-                                    url: 'http://serendipity.utpl.edu.ec/slider-v1/slider?id=10&tipo=responsive',
-                                    type: "get",
-                                    async: false,
-                                    //                                contentType: "text/json; charset=utf-8",
-                                    dataType: "json",
-                                    success: function (msg) {
-                                        document.getElementById("div_carrusel").innerHTML = msg;
-                                    },
-                                    error: function (jqXmlHttpRequest, textStatus, errorThrown) {
-                                        alert("Error leyendo datos.");
-                                    }
-                                });
-                            }
+                            
 
                             var page = 1;
                             var rows = 12;
@@ -1423,13 +1185,13 @@
 //            $("#categoria").change(function (event) {
 //                if ($("#categoria").val().trim() != '') {
 //                    var categorias = $("#categoria").val().split(',');
-//                    agregarTag(categorias[categorias.length - 1], true); // se envÃ­a el Ãºltimo tag ingresado
+//                    agregarTag(categorias[categorias.length - 1], true); // se envía el último tag ingresado
 //                }
 //            });
 //            $('#txtComment').on('keypress', function (e) {
 //                if (e.which === 13) {
 //                    if ($('#txtComment').val().trim() != '') {
-//                        agregarComment($("#txtComment").val().trim()); // se envÃ­a el Ãºltimo tag ingresado
+//                        agregarComment($("#txtComment").val().trim()); // se envía el último tag ingresado
 //                    }
 //                }
 //            });
@@ -1525,7 +1287,7 @@
                                             '<a href="#" target="_blank" onclick="obtenerDetalle(' + item.id + ');"> <img class="img-responsive center-block" src = "bancoideas/' + item.imagen + '" onerror="error(this)" style = "height: 100px;" /> </a>' +
                                             '<h3 class="box-title" style="height:50px;">' + item['nombre'] + '</h3>' +
                                             '<br><span class = "label label-default" style="height:25px;">' + item.kw + '</span>' +
-                                            '<div class = "box-body" style="height:75px;">' + description + '<a href="#" onclick="obtenerDetalle(' + item.id + ');"> ... ver mÃ¡s</a> </div>' +
+                                            '<div class = "box-body" style="height:75px;">' + description + '<a href="#" onclick="obtenerDetalle(' + item.id + ');"> ... ver más</a> </div>' +
                                             '<small>' +
                                             '<div class = "box-footer" style="margin-top:10px;">' +
                                             //                            '<div class="pull-right">' + construir_social(item, subfix, usr) + '</div>' +

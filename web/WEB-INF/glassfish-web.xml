@@ -3,6 +3,6 @@
 <glassfish-web-app error-url="">
     <!--<property name="alternatedocroot_3" value="from=/bancoideas/* dir=/app/glassfish/glassfish4/glassfish/domains/domain1/applications"/>-->-->
 
-    <property name="alternatedocroot_1" value="from=/bancoideas/* dir=/Users/utpl"/>
+    <!-- <property name="alternatedocroot_1" value="from=/bancoideas/* dir=/Users/utpl"/> -->
 
 </glassfish-web-app>
