@@ -89,7 +89,7 @@
             </div>
         </c:if>
         <!--SECCIÓN DE CONTENIDO-->
-        <div class="easyui-layout" style="height:700px;">
+        <div class="easyui-layout" style="height:800px;">
             <c:if test="${empty nueva}">
                 <div data-options="region:'north', border:false" >
                     <div id="span_total">
@@ -136,127 +136,125 @@
                                     "></ul>
                             </div>
                         </div>-->
-            <div data-options="region:'center',title:'Ideas',iconCls:'icon-ok'" style="height:625px;">
+            <div data-options="region:'center',title:'Ideas',iconCls:'icon-ok'" style="height:1000px;">
 
-                <div class="row" id="results" style="padding-left: 20px;">
+                <div class="" id="results" style="padding: 5px;">
                     <c:if test="${nueva == 'true' && opcion == '1'}">
-                        <div class="row" >
-                            <form:form action="guardar.htm" modelAttribute="idea"  method="POST" enctype="multipart/form-data"> <!--modelAttribute="idea"  enctype="multipart/form-data"-->
-                                <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
-                                <input type="hidden" id="id_us" name="id_us" value="${us}">
-                                <input type="hidden" id="opcion" name="opcion" value="1">
-                                <input type="hidden" id="tipo_adjunto" name="tipo_adjunto" >
+                        <form:form action="guardar.htm" modelAttribute="idea"  method="POST" enctype="multipart/form-data">
+                            <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
+                            <input type="hidden" id="id_us" name="id_us" value="${us}">
+                            <input type="hidden" id="opcion" name="opcion" value="1">
+                            <input type="hidden" id="tipo_adjunto" name="tipo_adjunto" >
 
-                                <div class="thumbnail">
-                                    <p  style="padding-left: 10px; "><span class="badge">1.</span><strong>&nbsp;&nbsp;Datos Generales</strong></p>  
-                                    <table class="table" style="width: 100%;">
-                                        <tr>
-                                            <td style="width: 15%;"> <label for="conv">Grupo</label> </td>
-                                            <td style="width: 85%;" colspan="3"> 
-                                                <select id="conv" name="conv" class="bg-info" style="size:50px;" required>
-                                                    <option value="" selected>---</option>
-                                                    <c:forEach items="${convocatorias}" var="item">
-                                                        <c:if test = "${item.id == idea.convocatoria.id}">
-                                                            <option value="${item.id}" selected="selected">${item.nombre}</option>
-                                                        </c:if>
-                                                        <c:if test = "${item.id != idea.convocatoria.id}">
-                                                            <option value="${item.id}">${item.nombre}</option>
-                                                        </c:if>
-                                                    </c:forEach>
-                                                </select> *
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> <label for="nombre">Título</label> </td>
-                                            <td style="width: 85%;" colspan="3"> <input type="text" id="nombre" name="nombre" value="${idea.nombre}" style="width: 98%;" required> *</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> <label>Imagen identificativa</label> </td>
-                                            <td style="width: 35%;" colspan="3"> 
-                                                <input type="file" name="imagen" id="imagen" path="imagen"/>
-                                                <c:if test = "${!empty idea.imagen}">
-                                                    <div>
-                                                        <a style="cursor:pointer" onclick="eliminar_archivo(this,${idea.id}, '${idea.imagen}', 1);"><span class="glyphicon glyphicon-remove"></span></a> <a href="${pageContext.request.contextPath}/bancoideas/${idea.imagen}" target="_blank">${idea.imagen}</a>
-                                                    </div>
-                                                </c:if>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> <label for="descripcion">Descripción</label> </td>
-                                            <td style="width: 85%;" colspan="3"> <input type="text" id="descripcion" name="descripcion" value="${idea.descripcion}" style="width: 98%;" required> *</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> <label for="lugar">Lugar de origen de la idea</label> </td>
-                                            <td style="width: 85%;" colspan="3"> <input type="text" id="lugar" name="lugar" value="${idea.lugar}" style="width: 98%;" required> *</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> <label for="kw">Palabras clave</label> </td>
-                                            <td style="width: 85%;" colspan="3"> <input type="text" id="kw" name="kw" value="${idea.kw}" data-role="tagsinput" placeholder="Ingrese palabras clave" style="width: 100% !important;" required> *</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 15%;"> 
-                                                <label>Adjuntos</label> 
-                                                <select id="cmb_adjunto" onChange="$('#tipo_adjunto').val($('#cmb_adjunto').val())">
-                                                    <c:forEach items="${tipos_adjuntos}" var="item">
+                            <div class="thumbnail">
+                                <p  style="padding-left: 10px; "><span class="badge">1</span> <strong>Datos Generales</strong></p>  
+                                <table class="table" style="width: 100%;">
+                                    <tr>
+                                        <td style="width: 15%;"> <label for="conv">Grupo</label> </td>
+                                        <td style="width: 85%;" colspan="3"> 
+                                            <select id="conv" name="conv" class="bg-info" style="size:50px;" required>
+                                                <option value="" selected>---</option>
+                                                <c:forEach items="${convocatorias}" var="item">
+                                                    <c:if test = "${item.id == idea.convocatoria.id}">
+                                                        <option value="${item.id}" selected="selected">${item.nombre}</option>
+                                                    </c:if>
+                                                    <c:if test = "${item.id != idea.convocatoria.id}">
                                                         <option value="${item.id}">${item.nombre}</option>
-                                                    </c:forEach>
-                                                </select> 
-                                                <a id="Agregar" style="cursor:pointer;" class="btn btn-xs btn-info" onclick="nuevo_elemento($('#cmb_adjunto').val());">Nuevo <span class="glyphicon glyphicon-plus"></span></a>
-                                            </td>
-                                            <td style="width: 85%;" colspan="3"> 
-                                                <table id="fileTable" class="table table-striped table-condensed">
-                                                    <tr>
-                                                        <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Archivo: </label> </td>
-                                                        <td style="width: 85%;"> <input type="file" name="adjuntos[0]" /> </td>
-                                                    </tr>
-                                                </table>
-
-                                                <table id="youtubeTable" class="table table-striped table-condensed">
-                                                    <tr>
-                                                        <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Youtube: </label> </td>
-                                                        <td style="width: 85%;"> <input type="url" id="youtube" name="youtube[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.youtube.com"> </td>
-                                                    </tr>
-                                                </table>
-                                                <table id="twitterTable" class="table table-striped table-condensed">
-                                                    <tr>
-                                                        <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Twitter: </label> </td>
-                                                        <td style="width: 85%;"> <input type="url" id="twitter" name="twitter[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.twitter.com"> </td>
-                                                    </tr>
-                                                </table>
-                                                <table id="facebookTable" class="table table-striped table-condensed">
-                                                    <tr>
-                                                        <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Facebook:</label> </td>
-                                                        <td style="width: 85%;"> <input type="url" id="facebook" name="facebook[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.facebook.com"> </td>
-                                                    </tr>
-                                                </table>
-
-                                                <c:forEach items="${adjuntos}" var="adjunto" varStatus="cont">
-                                                    <div>
-                                                        <c:if test="${adjunto.itemCatalogo.id == 43}" >
-                                                            [ ${cont.index} ] : <a style="cursor:pointer" onclick="eliminar_archivo(this,${adjunto.id}, '${adjunto.nombre}', 2)"><span class="glyphicon glyphicon-remove"></span></a> <a href="${pageContext.request.contextPath}/bancoideas/${adjunto.nombre}" target="_blank">${adjunto.nombre}</a>
-                                                            </c:if>
-                                                            <c:if test="${adjunto.itemCatalogo.id != 43}" >
-                                                            [ ${cont.index} ] :  <span><a href="${adjunto.nombre}" target="_blank"> ${adjunto.nombre}</span>
-                                                        </c:if>
-                                                    </div>
-                                                    <br>
+                                                    </c:if>
                                                 </c:forEach>
+                                            </select> *
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> <label for="nombre">Título</label> </td>
+                                        <td style="width: 85%;" colspan="3"> <input type="text" id="nombre" name="nombre" value="${idea.nombre}" style="width: 98%;" required> *</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> <label>Imagen identificativa</label> </td>
+                                        <td style="width: 35%;" colspan="3"> 
+                                            <input type="file" name="imagen" id="imagen" path="imagen"/>
+                                            <c:if test = "${!empty idea.imagen}">
+                                                <div>
+                                                    <a style="cursor:pointer" onclick="eliminar_archivo(this,${idea.id}, '${idea.imagen}', 1);"><span class="glyphicon glyphicon-remove"></span></a> <a href="${pageContext.request.contextPath}/bancoideas/${idea.imagen}" target="_blank">${idea.imagen}</a>
+                                                </div>
+                                            </c:if>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> <label for="descripcion">Descripción</label> </td>
+                                        <td style="width: 85%;" colspan="3"> <input type="text" id="descripcion" name="descripcion" value="${idea.descripcion}" style="width: 98%;" required> *</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> <label for="lugar">Lugar de origen de la idea</label> </td>
+                                        <td style="width: 85%;" colspan="3"> <input type="text" id="lugar" name="lugar" value="${idea.lugar}" style="width: 98%;" required> *</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> <label for="kw">Palabras clave</label> </td>
+                                        <td style="width: 85%;" colspan="3"> <input type="text" id="kw" name="kw" value="${idea.kw}" data-role="tagsinput" placeholder="Ingrese palabras clave" style="width: 100% !important;" required> *</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 15%;"> 
+                                            <label>Adjuntos</label> 
+                                            <select id="cmb_adjunto" onChange="$('#tipo_adjunto').val($('#cmb_adjunto').val())">
+                                                <c:forEach items="${tipos_adjuntos}" var="item">
+                                                    <option value="${item.id}">${item.nombre}</option>
+                                                </c:forEach>
+                                            </select> 
+                                            <a id="Agregar" style="cursor:pointer;" class="btn btn-xs btn-info" onclick="nuevo_elemento($('#cmb_adjunto').val());">Nuevo <span class="glyphicon glyphicon-plus"></span></a>
+                                        </td>
+                                        <td style="width: 85%;" colspan="3"> 
+                                            <table id="fileTable" class="table table-striped table-condensed">
+                                                <tr>
+                                                    <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Archivo: </label> </td>
+                                                    <td style="width: 85%;"> <input type="file" name="adjuntos[0]" /> </td>
+                                                </tr>
+                                            </table>
 
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <br>
-                                <div align="center">
-                                    <button id="btn_guardar" class="btn btn-primary" type="submit"> <span class="glyphicon glyphicon-ok"></span> Guardar</button>
-                                </div>
-                            </form:form> 
-                        </div>
+                                            <table id="youtubeTable" class="table table-striped table-condensed">
+                                                <tr>
+                                                    <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Youtube: </label> </td>
+                                                    <td style="width: 85%;"> <input type="url" id="youtube" name="youtube[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.youtube.com"> </td>
+                                                </tr>
+                                            </table>
+                                            <table id="twitterTable" class="table table-striped table-condensed">
+                                                <tr>
+                                                    <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Twitter: </label> </td>
+                                                    <td style="width: 85%;"> <input type="url" id="twitter" name="twitter[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.twitter.com"> </td>
+                                                </tr>
+                                            </table>
+                                            <table id="facebookTable" class="table table-striped table-condensed">
+                                                <tr>
+                                                    <td style="width: 15%;"> <label class="label label-default" style="margin-top: 10px;">Facebook:</label> </td>
+                                                    <td style="width: 85%;"> <input type="url" id="facebook" name="facebook[0]" style="width: 100%; margin-top: -5px;" placeholder="http://www.facebook.com"> </td>
+                                                </tr>
+                                            </table>
+
+                                            <c:forEach items="${adjuntos}" var="adjunto" varStatus="cont">
+                                                <div>
+                                                    <c:if test="${adjunto.itemCatalogo.id == 43}" >
+                                                        [ ${cont.index} ] : <a style="cursor:pointer" onclick="eliminar_archivo(this,${adjunto.id}, '${adjunto.nombre}', 2)"><span class="glyphicon glyphicon-remove"></span></a> <a href="${pageContext.request.contextPath}/bancoideas/${adjunto.nombre}" target="_blank">${adjunto.nombre}</a>
+                                                        </c:if>
+                                                        <c:if test="${adjunto.itemCatalogo.id != 43}" >
+                                                        [ ${cont.index} ] :  <span><a href="${adjunto.nombre}" target="_blank"> ${adjunto.nombre}</span>
+                                                    </c:if>
+                                                </div>
+                                                <br>
+                                            </c:forEach>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div align="center">
+                                <button id="btn_guardar" class="btn btn-primary" type="submit"> <span class="glyphicon glyphicon-ok"></span> Guardar</button><br><br>
+                            </div>
+                        </form:form> 
                     </c:if>
 
                     <!--para listar ideas del usuario--> 
                     <c:if test = "${ideas != null}">
-                        <div class="row">
+
                             <c:forEach items="${ideas}" var="idea">
                                 <div class="col-md-4">
                                     <div class="thumbnail" style="min-height: 250px; max-height: 250px; position:relative;">
@@ -294,7 +292,6 @@
                                     </div>
                                 </div>
                             </c:forEach>
-                        </div>
                         <script>
                             generarPaginacion(${fn:length(ideas)}, 1, 10);
                         </script>
@@ -302,9 +299,9 @@
 
                     <c:if test="${nueva == 'true' && opcion == '2'}">
                         <!--<a class="btn btn-primary pull-right" href="listar.htm"> <span class="glyphicon glyphicon-list"></span> Listar Ideas </a>-->
-                        <div class="row" >
+                        <div class="" >
                             <div class="col-md-4">
-                                <table class="table-striped table-bordered table-condensed" style="width: 100%;">
+                                <table class="table table-striped table-bordered table-condensed">
                                     <tr>
                                         <td> 
                                             <c:if test = "${idea.id == null}">
@@ -363,17 +360,17 @@
                                 </table>
                             </div>
 
-                            <div class="col-md-8">
+                            <div class="col-md-7">
                                 <c:if test = "${fase == 'idea'}">
-                                    <form:form action="guardar.htm" modelAttribute="idea"  method="POST" enctype="multipart/form-data"> <!--modelAttribute="idea"  enctype="multipart/form-data"-->
+                                    <form:form action="guardar.htm" modelAttribute="idea"  method="POST" enctype="multipart/form-data">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
                                         <input type="hidden" id="id_us" name="id_us" value="${us}">
                                         <input type="hidden" id="opcion" name="opcion" value="2">
                                         <input type="hidden" id="tipo_adjunto" name="tipo_adjunto" >
 
                                         <div class="thumbnail">
-                                            <p  style="padding-left: 10px; "><span class="badge">1.</span><strong>&nbsp;&nbsp;Datos Generales</strong></p>  
-                                            <table class="table" style="width: 100%;">
+                                            <p style="padding-left: 10px;"><span class="badge">1</span> <strong>Datos Generales</strong></p>  
+                                            <table class="table">
                                                 <tr>
                                                     <td style="width: 15%;"> <label for="conv">Grupo</label> </td>
                                                     <td style="width: 85%;" colspan="3"> 
@@ -532,13 +529,13 @@
                                         </div>
                                         <br>
                                         <div align="center">
-                                            <button id="btn_guardar" class="btn btn-primary" type="submit"> <span class="glyphicon glyphicon-ok"></span> Guardar</button>
+                                            <button id="btn_guardar" class="btn btn-primary" type="submit"> <span class="glyphicon glyphicon-ok"></span> Guardar</button><br><br>
                                         </div>
                                     </form:form> 
                                 </c:if>
 
                                 <c:if test = "${fase == 'participante'}">
-                                    <p style="padding-left: 10px;"><span class="badge">2.</span><strong>&nbsp;&nbsp;Miembros integrantes de la idea</strong></p>  
+                                    <p style="padding-left: 10px;"><span class="badge">2 </span> <strong>Miembros integrantes de la idea</strong></p>  
                                     <form action="agregarParticipante.htm" method="POST">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
                                         <table class="table" style="width: 100%;">
@@ -608,7 +605,7 @@
                                 </c:if>
 
                                 <c:if test = "${fase == 'estadogestacion'}">
-                                    <p style="padding-left: 10px;"><span class="badge">3.</span><strong>&nbsp;&nbsp;Estado de Gestación de la Idea</strong></p>  
+                                    <p style="padding-left: 10px;"><span class="badge">3</span> <strong>Estado de Gestación de la Idea</strong></p>  
                                     <form action="estadogestacion.htm" method="POST">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
                                         <table class="table" style="width: 100%;">
@@ -633,12 +630,12 @@
                                                 <td style="width: 85%;"> <input type="text" id="estadoComentario" name="estadoComentario" value="${item.estadoComentario}" style="width: 100%; margin-top: -5px;">
                                             </tr>   
                                         </table>
-                                        <button class="btn btn-primary" > <span class="glyphicon glyphicon-save"></span> Guardar</button>
+                                            <button class="btn btn-primary" > <span class="glyphicon glyphicon-save"></span> Guardar</button><br><br>
                                     </form>
                                 </c:if>
 
                                 <c:if test = "${fase == 'publicacion'}">
-                                    <p style="padding-left: 10px;"><span class="badge">4.</span><strong>&nbsp;&nbsp;Finalización de la idea</strong></p>  
+                                    <p style="padding-left: 10px;"><span class="badge">4</span> <strong>Finalización de la idea</strong></p>  
                                     <form action="publicar.htm" method="POST">
                                         <input type="hidden" id="id_idea" name="id_idea" value="${idea.id}">
                                         Al finalizar la idea, podrá ser evaluada por el agente evaluador.
@@ -656,14 +653,11 @@
                     </c:if>
                 </div>
             </div>
-
-            <div data-options="region:'south'" style="width:100%;"></div>
-
         </div>
         <div class="row" style="height: 30px; background: #fafafa;"></div>
         <footer style="border-top:5px solid #ff9100;">
             <div class="row">
-                <div class="col-md-3 text-center center-block"">
+                <div class="col-md-3 text-center center-block">
                     <!--SECCIÓN DE PATROCINADORES-->
                     <a style="cursor:pointer;" href="http://utpl.edu.ec/" target="_blank"> <img src="${pageContext.request.contextPath}/recursos/img/utpl.png" width="100px;"/> </a> 
                 </div>

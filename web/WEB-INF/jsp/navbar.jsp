@@ -53,7 +53,7 @@
                                     </div>
                                 </li>
                             </c:if>
-                            <li style="margin-top:5px;">
+                            <li style="margin-top:10px;">
                                 <c:if test = "${nombre != null}">
 <!--                                    <form action="idea_index.htm?us=${us}&nueva=true" method="GET">-->
                                     <button class="btn btn-sm btn-primary" onclick="$('#mdl_opcion').modal('show');"><strong>Nueva idea</strong> <span class="glyphicon glyphicon-plus"></span> </button> &nbsp;&nbsp;
@@ -64,7 +64,7 @@
                                 <!--<button class="btn btn-sm btn-primary" onclick="$('#mdl_contribucion').modal('show')"><strong>Contribución OER</strong> <span class="glyphicon glyphicon-plus"></span> </button> &nbsp;&nbsp;-->
                             </li>
                             <li>
-                                <nav class="navbar navbar-static-top">
+                                <nav class="">
                                     <!-- Sidebar toggle button-->
                                     <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                                         <span class="sr-only">Toggle navigation</span>
