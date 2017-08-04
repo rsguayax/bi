@@ -5,13 +5,13 @@
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
         
-<!--        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/oc?zeroDateTimeBehavior=convertToNull</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/oc?zeroDateTimeBehavior=convertToNull</property>
         <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">password</property>-->
+        <property name="hibernate.connection.password">password</property>
         
-        <property name="hibernate.connection.url">jdbc:mysql://lord.utpl.edu.ec:3306/oc?zeroDateTimeBehavior=convertToNull</property>
+<!--        <property name="hibernate.connection.url">jdbc:mysql://lord.utpl.edu.ec:3306/oc?zeroDateTimeBehavior=convertToNull</property>
         <property name="hibernate.connection.username">rsguayax</property>
-        <property name="hibernate.connection.password">rsg2012</property>
+        <property name="hibernate.connection.password">rsg2012</property>-->
         
         <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.transaction.auto_close_session">true</property>
