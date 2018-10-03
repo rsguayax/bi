@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/evalintegral/img/icon-utpl.png" type="image/png" />
+
+        <meta name="description" content="Sistema de Evaluación Integral de Desempeño Docente, para personal docente de la Universidad Técnica Particular de Loja"/>
+        <meta name="keywords" content="evaluación, integral, utpl, universidad, docentes"/>
+
+        <meta property="og:type" content="website"/>
+        <meta property="og:site_name" content="Sistema de Evaluación Integral UTPL"/>
+        <meta property="og:url" content="https://sica.utpl.edu.ec/evalintegral"/>
+        <meta property="og:title" content="Sistema de Evaluación Integral UTPL"/>
+        <meta property="og:image" content="https://sica.utpl.edu.ec/evalintegral/img/eval-integral.jpg"/>
+        <meta property="og:description" content="Sistema de Evaluación Integral de Desempeño Docente, para personal docente de la Universidad Técnica Particular de Loja"/>
+
+        <meta name="twitter:card" content="resource"/>
+        <meta name="twitter:site" content="@utpl"/>
+        <meta name="twitter:url" content="https://sica.utpl.edu.ec/evalintegral"/>
+        <meta name="twitter:title" content="Sistema de Evaluación Integral UTPL"/>
+        <meta name="twitter:description" content="Sistema de Evaluación Integral de Desempeño Docente, para personal docente de la Universidad Técnica Particular de Loja"/>
+        <meta name="twitter:image" content="https://sica.utpl.edu.ec/evalintegral/img/eval-integral.jpg"/>
+
+        <title>Login</title>
+        <!-- Bootstrap -->
+        <script type="text/javascript" th:src="@{/js/pace.js}"></script>
+        <link th:href="@{/css/bootstrap.css}" rel="stylesheet"/>
+        <link th:href="@{/css/theme_login.css}" rel="stylesheet"/>
+        <link th:href="@{/css/font-awesome.css}" rel="stylesheet"/>
+        <link th:href="@{/css/animate.css}" rel="stylesheet"/>
+        <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:700,400|Open+Sans+Condensed:300' rel='stylesheet' type='text/css'/>
+        <link th:href="@{/css/theme-loading-bar.css}" rel="stylesheet"/>
+
+        <link rel="stylesheet" th:href="@{/notify/animate.css}"/>
+        <script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+        <script type="text/javascript" th:src="@{/notify/bootstrap-notify.min.js}"></script>
+        <script th:src="@{/js/util.js}"></script>
+
+        <style>
+            @import url(http://fonts.googleapis.com/css?family=Old+Standard+TT:400,700);
+            [data-notify="container"][class*="alert-pastel-"] {
+                background-color: rgb(255, 255, 238);
+                border-width: 0px;
+                border-left: 15px solid rgb(255, 240, 106);
+                border-radius: 0px;
+                box-shadow: 0px 0px 5px rgba(51, 51, 51, 0.3);
+                font-family: 'Old Standard TT', serif;
+                letter-spacing: 1px;
+            }
+            [data-notify="container"].alert-pastel-info {
+                border-left-color: rgb(255, 179, 40);
+            }
+            [data-notify="container"].alert-pastel-danger {
+                border-left-color: rgb(255, 103, 76);
+            }
+            [data-notify="container"][class*="alert-pastel-"] > [data-notify="title"] {
+                color: rgb(80, 80, 57);
+                display: block;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+            [data-notify="container"][class*="alert-pastel-"] > [data-notify="message"] {
+                font-weight: 400;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container" id="container" style="display:none;">
+            <header>
+                <!-- Main comapny header -->
+                <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                    <div class="container">
+                        <div class="navbar-header">
+                            <a class="navbar-brand top-navbar-brand" style="margin-top: -10px;" href="http://www.utpl.edu.ec" target="_blank"><img src="img/utpl.png" style="width: 150px;"/> </a>
+                            <a class="navbar-brand top-navbar-brand" style="margin-top: -10px;" href="http://www.utpl.edu.ec" target="_blank"><img src="img/eval.png" style="width: 150px;"/> </a>
+                        </div>
+                        <ul class="nav navbar-nav navbar-right bigger-130 hidden-xs">
+                            <li><a href="https://api.addthis.com/oexchange/0.8/forward/google_plusone_share/offer?url=https://sica.utpl.edu.ec/evalintegral" target="_blank"><i class="fa fa-google"></i></a></li>
+                            <li><a href="https://api.addthis.com/oexchange/0.8/forward/facebook/offer?url=https://sica.utpl.edu.ec/evalintegral" target="_blank"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="https://api.addthis.com/oexchange/0.8/forward/twitter/offer?url=https://sica.utpl.edu.ec/evalintegral" target="_blank"><i class="fa fa-twitter"></i></a></li>
+                        </ul>
+                        <h3 class="center-block text-center">Evaluación integral de desempeño docente UTPL</h3>
+                    </div>
+                </nav>
+            </header>
+            <section id="form" class="animated fadeInDown">
+                <div class="container">   
+                    <div id="loginbox" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">                    
+                        <div class="panel white-alpha-90" >
+                            <div class="panel-heading">
+                                <div class="pull-left"><img src="img/user-profile.png" class="img-circle" alt="User Image" style="width: 50px; padding-top: -5px;"/> </div>
+                                <div class="panel-title text-center"><h2>Ingreso al  <span class="text-primary">Sistema</span></h2></div>
+                            </div>     
+                            <div class="panel-body" >
+                                <!--<div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>-->
+                                <span class="glyphicon glyphicon-info-sign"></span>&nbsp;Utilice sus credenciales del correo institucional.
+                                <br/><br/>
+                                <form id="loginform" class="form-horizontal" role="form" th:action="@{/auth}" method="post">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                        <input id="login-username" type="text" class="form-control" name="username" autocomplete="true" required="required" placeholder="username" autofocus="autofocus" />                                        
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                        <input id="login-password" type="password" class="form-control" name="password" placeholder="password" />
+                                    </div>
+                                    <div class="input-group col-xs-12 text-center login-action">
+                                        <div class="checkbox">
+                                            <label>
+                                                <button type="submit" class="btn btn-primary btn-sm btn-block" id="login" name="login"><i class="glyphicon glyphicon-log-in"></i> Ingresar</button>
+                                                <!--<span id="btn-login"><a href="#" class="btn btn-success">Login  </a></span>-->
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!--                                    <span th:if="${#strings.isEmpty(mensaje)}">
+                                                                            <script>
+                                                                                notificar('glyphicon glyphicon-user', 'Inicio', 'Bienvenid@ al sistema de Evaluación Integral', 'pastel-info');
+                                                                            </script>
+                                                                        </span>-->
+                                    <span th:if="${not #lists.isEmpty(mensaje)}">
+                                        <script>
+                                            notificar('glyphicon glyphicon-user', 'Login', 'Ingreso incorrecto', 'pastel-danger');
+                                        </script>
+                                        <div class="alert alert-danger alert-dismissible" role="alert">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <p style="font-size: 12px; padding-right: 15px;" th:text="${mensaje}"></p>
+                                        </div>
+                                    </span>
+                                </form>     
+                            </div>                     
+                        </div>  
+                    </div>
+                </div>
+            </section>
+            <footer>
+                <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+                    <div class="container text-center">
+                        <div class="footer-content">
+                            <p>Copyright 2017 Evaluación Integral. All rights reserved. <a href="http://www.utpl.edu.ec" target="_blank">UTPL</a></p>
+                            <!--Haven't registered yet? <a href="register.html" class="btn btn-primary"> Register Here </a>-->
+                        </div>
+                    </div><!-- /.container-fluid -->
+                </nav>
+            </footer>
+        </div>
+
+        <script type="text/javascript" th:src="@{/js/jquery-1.11.2.js}"></script>
+        <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+        <script type="text/javascript" th:src="@{/js/jquery.backstretch.min.js}"></script>
+        <script src="https://use.fontawesome.com/a4a5de964a.js"></script>
+
+        <script>
+                                            Pace.on('hide', function () {
+                                                $("#container").fadeIn('1000');
+                                                $.backstretch([
+                                                    "/evalintegral/img/eval-integral.jpg",
+                                                    "/evalintegral/img/utpl2.jpg"
+                                                ], {duration: 5000, fade: 1000});
+                                            });
+        </script>
+    </body>
+</html>

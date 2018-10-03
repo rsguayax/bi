@@ -9,4 +9,5 @@
     <system systemId="http://srv-si-001.utpl.edu.ec:8080/AutenticacionAcademicoUS.svc?wsdl=wsdl0" uri="wsdl/srv-si-001.utpl.edu.ec_8080/AutenticacionAcademicoUS.svc.wsdl_wsdl0.wsdl"/>
     <system systemId="http://srv-si-001.utpl.edu.ec:8080/AutenticacionAcademicoUS.svc?xsd=xsd0" uri="wsdl/srv-si-001.utpl.edu.ec_8080/AutenticacionAcademicoUS.svc.xsd_xsd0.xsd"/>
     <system systemId="http://172.16.50.154/eva/enrol/utpl/lib/syllabus/AutenticacionAcademico.php?wsdl" uri="wsdl/172.16.50.154/eva/enrol/utpl/lib/syllabus/AutenticacionAcademico.php.wsdl"/>
+    <system systemId="http://data.utpl.edu.ec/sga/person?wsdl" uri="wsdl/data.utpl.edu.ec/sga/person.wsdl"/>
 </catalog>
