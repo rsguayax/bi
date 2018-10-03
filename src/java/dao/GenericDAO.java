@@ -156,7 +156,7 @@ public abstract class GenericDAO<Entity, K extends Serializable> {
     
     public List<Entity> listar_condicion_query(String q) {
         try {
-            List<Entity> lista = (List<Entity>) getHibernateTemplate().createQuery(q).setMaxResults(10).list();
+            List<Entity> lista = (List<Entity>) getHibernateTemplate().createQuery(q).list();//.setMaxResults(10).list();
 //            session.getTransaction().commit();
             return lista;
         } catch (Exception ex) {
@@ -170,6 +170,22 @@ public abstract class GenericDAO<Entity, K extends Serializable> {
         return null;
     }
 
+    public int buscar_id(String q) {
+        try {
+            int lista = (int) getHibernateTemplate().createQuery(q).uniqueResult();
+//            session.getTransaction().commit();
+            return lista;
+        } catch (Exception ex) {
+            Logger.getLogger(Level.SEVERE.getName(), " Excepción al listar_sentencia_sql_count para [ " + domainClass + "] -->" + ex);
+        } finally {
+            if (session.isOpen()) {
+                session.flush();
+                session.close();
+            }
+        }
+        return 0;
+    }
+    
     public long listar_sentencia_sql_count(String q) {
         try {
             long lista = (long) getHibernateTemplate().createQuery(q).uniqueResult();
@@ -186,12 +202,42 @@ public abstract class GenericDAO<Entity, K extends Serializable> {
         return 0;
     }
     
+    public Entity buscar_where(String where) {
+        try {
+            String q = "from " + domainClass.getName() + " " + where;
+            Entity returnValue = (Entity) getHibernateTemplate().createQuery(q).uniqueResult();
+            return returnValue;
+        } catch (Exception ex) {
+            Logger.getLogger(Level.SEVERE.getName(), " Excepción al listar en [ " + domainClass + "] -->" + ex);
+        } finally {
+            if (session.isOpen()) {
+                session.flush();
+                session.close();
+            }
+        }
+        return null;
+    }
+    
+    public List<Entity> listar_where(String where) {
+        try {
+            String q = "from " + domainClass.getName() + " " + where;
+            List<Entity> returnValue = (List<Entity>) getHibernateTemplate().createQuery(q).list();
+            return returnValue;
+        } catch (Exception ex) {
+            Logger.getLogger(Level.SEVERE.getName(), " Excepción al listar en [ " + domainClass + "] -->" + ex);
+        } finally {
+            if (session.isOpen()) {
+                session.flush();
+                session.close();
+            }
+        }
+        return null;
+    }
+    
     public List<Entity> listar(String orderby) {
         try {
-//            List<Entity> returnValue = (List<Entity>) getHibernateTemplate().createCriteria(domainClass).list();
             String q = "from " + domainClass.getName() + " " + orderby;
             List<Entity> returnValue = (List<Entity>) getHibernateTemplate().createQuery(q).list();
-//            session.getTransaction().commit();
             return returnValue;
         } catch (Exception ex) {
             Logger.getLogger(Level.SEVERE.getName(), " Excepción al listar en [ " + domainClass + "] -->" + ex);

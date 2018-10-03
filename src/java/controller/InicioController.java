@@ -4,9 +4,10 @@
  */
 package controller;
 
+import auth_rest.Autenticacion;
+import auth_rest.AuthenticationData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import dao.*;
@@ -14,8 +15,6 @@ import estructura.FileUploadMD;
 import estructura.ItemEstructura;
 import estructura.Login;
 import estructura.Menu;
-import eva.auth.AutenticacionAcademicoRpsType;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,10 +22,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,10 +40,6 @@ import nsga.persona.CorreoType;
 import nsga.persona.IPersonaESConsultarPorIdentificacionBusinessExceptionTypeFaultMessage;
 import nsga.persona.IPersonaESConsultarPorUsloguinBusinessExceptionTypeFaultMessage;
 import nsga.persona.PersonaType;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -53,7 +50,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 //import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 import util.Utiles;
 //import org.springframework.web.multipart.MultipartFile;
 
@@ -87,6 +83,13 @@ public class InicioController {
 
 //    String localPath = "/Users/utpl/bancoideas/";
     String localPath = "/app/glassfish/glassfish4/glassfish/domains/domain1/applications/bancoideas/";
+
+    @RequestMapping(value = "/auth", method = RequestMethod.GET)
+    public String login(Model model) {
+        Login login = new Login("", "");
+        model.addAttribute("login", login);
+        return "login";
+    }
 
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public String index(Model model, HttpServletRequest req) {
@@ -143,6 +146,7 @@ public class InicioController {
                 boolean evaluador = false;
                 List<Idea> ideas = new ArrayList<>();
                 //listar ideas del usuario
+                evaluador = true;
                 if (id_conv == -1) {
                     ideas = ideaDao.listar_condicion("usuario.id", idUs);
                 } else { //listar todas las ideas de la convocatoria
@@ -152,26 +156,43 @@ public class InicioController {
                         evaluador = true;
                     }
                 }
+                for (Idea idea : ideas) {
+                    idea.setImagen("/recursos/img/utpl.png");
+                }
+//                JSONArray array = new JSONArray();
+//                for (Idea i : ideas) {
+//                    JSONObject j = new JSONObject();
+//                    j.put("id", i.getId());
+//                    j.put("nombre", i.getNombre());
+//                    j.put("descripcion", i.getDescripcion());
+//                    j.put("kw", i.getKw());
+//                    j.put("imagen", "/recursos/img/utpl.png");
+//                    array.add(j);
+//                }
                 model.addAttribute("evaluador", evaluador);
                 model.addAttribute("ideas", ideas);
                 model.addAttribute("us", idUs);
+                model.addAttribute("conv", id_conv);
                 return "index";
             }
         } catch (Exception ex) {
             model.addAttribute("mensaje", ex.getMessage());
         }
-        return "index";
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/auth", method = RequestMethod.POST)
-    public String login(@ModelAttribute("login") Login login, BindingResult result, Model model, HttpServletRequest req) {
+    public String login(@ModelAttribute("login") Login login, Model model, HttpServletRequest req) {
         try {
-            if (result.hasErrors()) {
-                return "index";
-            } else if (!login.getUsername().equals("") && !login.getPassword().equals("")) {
+            req.setCharacterEncoding("UTF-8");
+            if (!login.getUsername().equals("") && !login.getPassword().equals("")) {
                 String usuario = login.getUsername();
+                if(usuario.contains("@")){
+                    usuario = usuario.substring(0, usuario.indexOf("@"));
+                }
                 String pass = login.getPassword();
                 String encrypt = util.md5(pass);
+                Autenticacion t = new Autenticacion();
                 UsuarioAuth usr = usaDao.buscar("user", usuario);
                 boolean auth = false;
                 boolean authEva = true;
@@ -182,9 +203,18 @@ public class InicioController {
                             usaDao.actualizar(usr);
                             auth = true;
                         } else {
-                            AutenticacionAcademicoRpsType resp = wsNsga.autenticar_usuario_eva(usuario, pass);
-//                        AutenticarMsgRpsType resp = wsNsga.autenticar_usuario_sin_password_nsga(usuario);
-                            if (resp.getMsgRetorno().equals("true")) { //EVA=true, NSGA= True
+                            auth = true;
+                            AuthenticationData autenticacion = null;
+                            System.out.println("***se está iniciando la autenticación para: " + usr.getUser());
+                            try {
+                                autenticacion = t.authenticate(usuario, pass);
+                                System.out.println("***auth successful obtenido para: " + autenticacion.Data.Nombres);
+                            } catch (Exception ex) {
+                                System.out.println("msg println");
+                                Logger.getLogger("***Error en autenticación").log(Level.SEVERE, "error en autenticación para:  " + usr.getUser() + ">> " + ex.getMessage());
+                            }
+                            Logger.getLogger("***fin de auth.").log(Level.SEVERE, "fin de autenticación para: " + usr.getUser());
+                            if (autenticacion.Status == 1) {
                                 usr.setPassword(encrypt);
                                 usr.setUltimoIngreso(new Date());
                                 usaDao.actualizar(usr);
@@ -193,40 +223,39 @@ public class InicioController {
                                 model.addAttribute("mensaje", "Usuario o clave incorrectos");
                             }
                         }
-                    } else {//validamos credenciales en servicio EVA
-                        AutenticacionAcademicoRpsType resp = wsNsga.autenticar_usuario_eva(usuario, pass);
-//                    AutenticarMsgRpsType resp = wsNsga.autenticar_usuario_sin_password_nsga(usuario);
-                        if (resp.getMsgRetorno().equals("true")) {
-                            usr.setPassword(encrypt);
-                            usr.setUltimoIngreso(new Date());
-                            usaDao.actualizar(usr);
-                            auth = true;
-                        } else {
-                            model.addAttribute("mensaje", "Usuario o clave incorrectos");
-                        }
-                    }
-                } else {//verificamos si son correctas las credenciales, verificamos si existe usuario en eva
-                    AutenticacionAcademicoRpsType resp = wsNsga.autenticar_usuario_eva(usuario, pass);
-//                AutenticarMsgRpsType resp = wsNsga.autenticar_usuario_sin_password_nsga(usuario);
-                    if (resp.getMsgRetorno().equals("true")) {
-                        authEva = true;
-                        PersonaType p = wsNsga.buscar_persona_cedula_nsga(resp.getIdentificacion());
-                        String nombre = p.getPrimerNombre() + " " + p.getSegundoNombre() + " " + p.getPrimerApellido() + " " + p.getSegundoApellido();
-                        Usuario us = new Usuario(p.getId(), p.getIdentificacion(), nombre, "", new Date(), Boolean.TRUE);
-                        us = usrDao.guardar(us);
-                        UsuarioAuth usa = new UsuarioAuth(us, usuario, encrypt, new Date());
-                        usr = usaDao.guardar(usa);
-                        //Agregamos el rol de innovador:  ROL INNOVADOR = 1
-                        RolUsuario ru = rusDao.buscar("rol.id", "usuario.id", 1, us.getId());
-                        if (ru == null) {
-                            Rol rol = rolDao.buscar(1); //rol innnovador
-                            ru = new RolUsuario(rol, us);
-                            rusDao.guardar(ru);
-                        }
+                    } else {//validamos credenciales en servicio NSGA
                         auth = true;
-                    } else {
-                        model.addAttribute("mensaje", "Usuario o clave incorrectos");
+//                        AuthenticationData autenticacion = t.authenticate(usuario, pass);
+//                        if (autenticacion.Status == 1) {
+//                            usr.setPassword(encrypt);
+//                            usr.setUltimoIngreso(new Date());
+//                            usaDao.actualizar(usr);
+//                            auth = true;
+//                        } else {
+//                            model.addAttribute("mensaje", "Usuario o clave incorrectos");
+//                        }
                     }
+                } else {
+//                    AuthenticationData autenticacion = t.authenticate(usuario, pass);
+//                    if (autenticacion.Status == 1) {
+//                        PersonaType p = wsNsga.buscar_persona_cedula_nsga(autenticacion.Data.Identificacion);
+                    PersonaType p = wsNsga.buscar_persona_usuario_nsga(usuario);
+                    String nombre = p.getPrimerNombre() + " " + p.getSegundoNombre() + " " + p.getPrimerApellido() + " " + p.getSegundoApellido();
+                    Usuario us = new Usuario(p.getId(), p.getIdentificacion(), nombre, "", new Date(), Boolean.TRUE);
+                    us = usrDao.guardar(us);
+                    UsuarioAuth usa = new UsuarioAuth(us, usuario, encrypt, new Date());
+                    usr = usaDao.guardar(usa);
+                    //Agregamos el rol de innovador:  ROL INNOVADOR = 1
+                    RolUsuario ru = rusDao.buscar("rol.id", "usuario.id", 1, us.getId());
+                    if (ru == null) {
+                        Rol rol = rolDao.buscar(1); //rol innnovador
+                        ru = new RolUsuario(rol, us);
+                        rusDao.guardar(ru);
+                    }
+                    auth = true;
+//                    } else {
+//                        model.addAttribute("mensaje", autenticacion.Message + " : " + autenticacion.Status);
+//                    }
                 }
                 if (auth) {// es innovador
                     String foto = "/bancoideas/recursos/img/user-profile.png";
@@ -246,37 +275,52 @@ public class InicioController {
 
                     //obtenemos la foto del docente desde SICA
                     try {
-                        String cedula = usr.getUsuario().getCedula();
-                        if (cedula.length() > 10) {
-                            cedula = cedula.substring(0, 10);
-                        }
-                        Client cliente = Client.create();
-                        WebResource recurso;
-                        String URI = "http://carbono.utpl.edu.ec:8080/RESTFUL_SICA/webresources/entidades.docentes/buscarPorCedula?cedula=" + cedula;
-                        recurso = cliente.resource(URI);
-                        String resultado = recurso.accept(MediaType.APPLICATION_JSON).get(String.class);
-                        org.json.JSONObject resultados = new org.json.JSONObject(resultado).getJSONObject("docente");
-                        if (!resultados.getString("photo").equals("")) {
-                            foto = "https://sica.utpl.edu.ec/media/uploads/fotos/" + resultados.getString("photo");
+                        try {
+                            String cedula = usr.getUsuario().getCedula();
+                            if (cedula.length() > 10) {
+                                cedula = cedula.substring(0, 10);
+                            }
+                            Client cliente = Client.create();
+                            WebResource recurso;
+                            String URI = "https://sica.utpl.edu.ec/api/persons/" + cedula + "/";
+                            recurso = cliente.resource(URI);
+                            String resultado = recurso.accept(MediaType.APPLICATION_JSON).get(String.class);
+                            org.json.JSONObject resultados = new org.json.JSONObject(resultado);
+                            if (!resultados.getString("image").equals("")) {
+//                                "https://sica.utpl.edu.ec/media/uploads/fotos/" +
+                                foto = resultados.getString("image");
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("");
                         }
                     } catch (Exception ex) {
                         System.out.println("");
                     }
+                    int id_conv = -1;
+                    try {
+                        String fechaActual = format.format(new Date());
+                        id_conv = convDao.buscar_id("SELECT convocatoria.id FROM ConvocatoriaResponsable WHERE usuario.id = " + usr.getUsuario().getId() + " AND '" + fechaActual + "' between convocatoria.fechaInicio AND convocatoria.fechaFin");
+                    } catch (Exception ex) {
+                    }
                     sesion.setAttribute("foto", foto);
-                    return "redirect:/principal.htm?us=" + usr.getUsuario().getId();
+                    if (id_conv == -1) {
+                        return "redirect:/principal.htm?us=" + usr.getUsuario().getId();
+                    } else {
+                        return "redirect:/principal.htm?us=" + usr.getUsuario().getId() + "&conv=" + id_conv;
+                    }
                 } else {// es estudiante
                     model.addAttribute("mensaje", "Usuario o clave incorrectos.!");
                     return "index";
                 }
             } else {
                 model.addAttribute("mensaje", "Es necesario ingresar el usuario y la clave.");
-                return "index";
+                return "login";
             }
         } catch (Exception ex2) {
             System.out.println(ex2.getMessage());
             model.addAttribute("mensaje", "No se ha podido autenticar: " + ex2.getMessage());
         }
-        return "index";
+        return "login";
     }
 
     public List<Menu> generarMenuUsuario(int usuario) {
@@ -440,6 +484,7 @@ public class InicioController {
     AdjuntoDao adjDao = new AdjuntoDao();
 
     Utiles u = new Utiles();
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
     @RequestMapping(value = "/idea_index", method = RequestMethod.GET)
     public String idea_index(Model model, HttpServletRequest req) {
@@ -449,45 +494,54 @@ public class InicioController {
             model.addAttribute("nombre", session.getAttribute("nombre").toString());
             model.addAttribute("menu", session.getAttribute("menu"));
             model.addAttribute("foto", session.getAttribute("foto").toString());
-        }
-        model.addAttribute("convocatorias", session.getAttribute("convocatorias"));
+
+            String fechaActual = format.format(new Date());
+            model.addAttribute("convocatorias", conDao.listar_where(" WHERE '" + fechaActual + "' between fechaInicio AND fechaFin"));
 //        ModelAndView mv = new ModelAndView("idea/index");
-        List<ItemCatalogo> tipos = itemDao.listar_condicion("catalogo.id", 1); // obtiene los items de los TIPOS de ideas
-        List<ItemCatalogo> areas = itemDao.listar_condicion("catalogo.id", 2); // obtiene los items de las AREAS de clasificación de las ideas
-        List<ItemCatalogo> mediaTipo = itemDao.listar_condicion("catalogo.id", 4); // obtiene los items de las AREAS de clasificación de las ideas
-        List<ItemCatalogo> tiposAdjuntos = itemDao.listar_condicion("catalogo.id", 8); // obtiene los items de los tipos de adjuntos
-        model.addAttribute("mediaTipo", mediaTipo);
-        model.addAttribute("tipos", tipos);
-        model.addAttribute("tipos_adjuntos", tiposAdjuntos);
-        model.addAttribute("areas", areas);
-        model.addAttribute("fase", "idea");
-        model.addAttribute("us", id_us);
+            List<ItemCatalogo> tipos = itemDao.listar_condicion("catalogo.id", 1); // obtiene los items de los TIPOS de ideas
+            List<ItemCatalogo> areas = itemDao.listar_condicion("catalogo.id", 2); // obtiene los items de las AREAS de clasificación de las ideas
+            List<ItemCatalogo> mediaTipo = itemDao.listar_condicion("catalogo.id", 4); // obtiene los items de las AREAS de clasificación de las ideas
+            List<ItemCatalogo> tiposAdjuntos = itemDao.listar_condicion("catalogo.id", 8); // obtiene los items de los tipos de adjuntos
+            model.addAttribute("mediaTipo", mediaTipo);
+            model.addAttribute("tipos", tipos);
+            model.addAttribute("tipos_adjuntos", tiposAdjuntos);
+            model.addAttribute("areas", areas);
+            model.addAttribute("fase", "idea");
+            model.addAttribute("us", id_us);
 
-        model.addAttribute("nueva", req.getParameter("nueva"));
+            model.addAttribute("nueva", req.getParameter("nueva"));
 
-        List<ItemCatalogo> estadosgestacion = itemDao.listar_condicion("catalogo.id", 7); // obtiene los items de estados de gestación de una idea
-        model.addAttribute("estadosgestacion", estadosgestacion);
-        int idIdea = -1;
-        try {
-            idIdea = Integer.parseInt(req.getParameter("id_idea"));
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            List<ItemCatalogo> estadosgestacion = itemDao.listar_condicion("catalogo.id", 7); // obtiene los items de estados de gestación de una idea
+            model.addAttribute("estadosgestacion", estadosgestacion);
+            int idIdea = -1;
+            try {
+                idIdea = Integer.parseInt(req.getParameter("id_idea"));
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+            if (idIdea != -1) {
+                Idea idea = ideaDao.buscar(idIdea);
+                model.addAttribute("idea", idea);
+                List<Adjunto> adjuntos = adjDao.listar_condicion("idea.id", idea.getId());
+                model.addAttribute("adjuntos", adjuntos);
+            }
+            List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
+            model.addAttribute("participantes", participantes);
+
+            Login login = new Login("", "");
+            model.addAttribute("login", login);
+
+            model.addAttribute("opcion", req.getParameter("opcion"));
+
+            int id_conv = -1;
+            try {
+                String fa = format.format(new Date());
+                id_conv = convDao.buscar_id("SELECT convocatoria.id FROM ConvocatoriaResponsable WHERE usuario.id = " + id_us + " AND '" + fa + "' between convocatoria.fechaInicio AND convocatoria.fechaFin");
+            } catch (Exception ex) {
+            }
+            return "index";
         }
-        if (idIdea != -1) {
-            Idea idea = ideaDao.buscar(idIdea);
-            model.addAttribute("idea", idea);
-            List<Adjunto> adjuntos = adjDao.listar_condicion("idea.id", idea.getId());
-            model.addAttribute("adjuntos", adjuntos);
-        }
-        List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
-        model.addAttribute("participantes", participantes);
-
-        Login login = new Login("", "");
-        model.addAttribute("login", login);
-
-        model.addAttribute("opcion", req.getParameter("opcion"));
-        return "index";
-//        return "idea/index";
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/participante", method = RequestMethod.GET)
@@ -497,27 +551,29 @@ public class InicioController {
             model.addAttribute("nombre", session.getAttribute("nombre").toString());
             model.addAttribute("menu", session.getAttribute("menu"));
             model.addAttribute("foto", session.getAttribute("foto").toString());
+
+            int idIdea = Integer.parseInt(req.getParameter("id_idea"));
+            int idUs = Integer.parseInt(req.getParameter("us"));
+            Idea idea = ideaDao.buscar(idIdea);
+            List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
+            List<ItemCatalogo> funcion = itemDao.listar_condicion("catalogo.id", 5); // obtiene los items de las AREAS de clasificación de las ideas
+            model.addAttribute("funcion", funcion);
+            model.addAttribute("fase", "participante");
+            model.addAttribute("participantes", participantes);
+            model.addAttribute("idea", idea);
+            model.addAttribute("idConv", idea.getConvocatoria().getId());
+            model.addAttribute("us", idUs);
+
+            model.addAttribute("nueva", req.getParameter("nueva"));
+
+            Login login = new Login("", "");
+            model.addAttribute("login", login);
+
+            model.addAttribute("opcion", req.getParameter("opcion"));
+
+            return "index";
         }
-        int idIdea = Integer.parseInt(req.getParameter("id_idea"));
-        int idUs = Integer.parseInt(req.getParameter("us"));
-        Idea idea = ideaDao.buscar(idIdea);
-        List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
-        List<ItemCatalogo> funcion = itemDao.listar_condicion("catalogo.id", 5); // obtiene los items de las AREAS de clasificación de las ideas
-        model.addAttribute("funcion", funcion);
-        model.addAttribute("fase", "participante");
-        model.addAttribute("participantes", participantes);
-        model.addAttribute("idea", idea);
-        model.addAttribute("idConv", idea.getConvocatoria().getId());
-        model.addAttribute("us", idUs);
-
-        model.addAttribute("nueva", req.getParameter("nueva"));
-
-        Login login = new Login("", "");
-        model.addAttribute("login", login);
-
-        model.addAttribute("opcion", req.getParameter("opcion"));
-
-        return "index";
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/estadogestacion", method = RequestMethod.GET)
@@ -527,31 +583,33 @@ public class InicioController {
             model.addAttribute("nombre", session.getAttribute("nombre").toString());
             model.addAttribute("menu", session.getAttribute("menu"));
             model.addAttribute("foto", session.getAttribute("foto").toString());
+
+            int idIdea = Integer.parseInt(req.getParameter("id_idea"));
+            int idUs = Integer.parseInt(req.getParameter("us"));
+
+            Idea idea = ideaDao.buscar(idIdea);
+
+            model.addAttribute("fase", "estadogestacion");
+            model.addAttribute("idea", idea);
+            model.addAttribute("idConv", idea.getConvocatoria().getId());
+            model.addAttribute("us", idUs);
+
+            List<ItemCatalogo> estadosgestacion = itemDao.listar_condicion("catalogo.id", 7);//items de estados de gestación de la idea
+            model.addAttribute("estadosgestacion", estadosgestacion);
+
+            List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
+            model.addAttribute("participantes", participantes);
+
+            model.addAttribute("nueva", req.getParameter("nueva"));
+
+            Login login = new Login("", "");
+            model.addAttribute("login", login);
+
+            model.addAttribute("opcion", req.getParameter("opcion"));
+
+            return "index";
         }
-        int idIdea = Integer.parseInt(req.getParameter("id_idea"));
-        int idUs = Integer.parseInt(req.getParameter("us"));
-
-        Idea idea = ideaDao.buscar(idIdea);
-
-        model.addAttribute("fase", "estadogestacion");
-        model.addAttribute("idea", idea);
-        model.addAttribute("idConv", idea.getConvocatoria().getId());
-        model.addAttribute("us", idUs);
-
-        List<ItemCatalogo> estadosgestacion = itemDao.listar_condicion("catalogo.id", 7);//items de estados de gestación de la idea
-        model.addAttribute("estadosgestacion", estadosgestacion);
-
-        List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
-        model.addAttribute("participantes", participantes);
-
-        model.addAttribute("nueva", req.getParameter("nueva"));
-
-        Login login = new Login("", "");
-        model.addAttribute("login", login);
-
-        model.addAttribute("opcion", req.getParameter("opcion"));
-
-        return "index";
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/publicar", method = RequestMethod.GET)
@@ -561,28 +619,30 @@ public class InicioController {
             model.addAttribute("nombre", session.getAttribute("nombre").toString());
             model.addAttribute("menu", session.getAttribute("menu"));
             model.addAttribute("foto", session.getAttribute("foto").toString());
+
+            int idIdea = Integer.parseInt(req.getParameter("id_idea"));
+            int idUs = Integer.parseInt(req.getParameter("us"));
+
+            Idea idea = ideaDao.buscar(idIdea);
+
+            model.addAttribute("fase", "publicacion");
+            model.addAttribute("idea", idea);
+            model.addAttribute("idConv", idea.getConvocatoria().getId());
+            model.addAttribute("us", idUs);
+
+            List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
+            model.addAttribute("participantes", participantes);
+
+            model.addAttribute("nueva", req.getParameter("nueva"));
+
+            Login login = new Login("", "");
+            model.addAttribute("login", login);
+
+            model.addAttribute("opcion", req.getParameter("opcion"));
+
+            return "index";
         }
-        int idIdea = Integer.parseInt(req.getParameter("id_idea"));
-        int idUs = Integer.parseInt(req.getParameter("us"));
-
-        Idea idea = ideaDao.buscar(idIdea);
-
-        model.addAttribute("fase", "publicacion");
-        model.addAttribute("idea", idea);
-        model.addAttribute("idConv", idea.getConvocatoria().getId());
-        model.addAttribute("us", idUs);
-
-        List<Participante> participantes = partDao.listar_condicion("idea.id", idIdea);
-        model.addAttribute("participantes", participantes);
-
-        model.addAttribute("nueva", req.getParameter("nueva"));
-
-        Login login = new Login("", "");
-        model.addAttribute("login", login);
-
-        model.addAttribute("opcion", req.getParameter("opcion"));
-
-        return "index";
+        return "redirect:/";
     }
 
 //    @RequestMapping(value = "/listar", method = RequestMethod.GET)
@@ -597,13 +657,116 @@ public class InicioController {
     @RequestMapping(value = "/buscar", method = RequestMethod.GET)
     @ResponseBody
     public void buscar(Model model, HttpServletRequest req, HttpServletResponse response) throws IOException {
-        response.setContentType("application/json");
+        response.setContentType("application/json;charset=utf-8");
         try {
             String cadena = req.getParameter("cadena");
-            String q = "from Idea a where a.publicar = 1 and (a.nombre like '%" + cadena + "%' or a.descripcion like '%" + cadena + "%' or a.kw like '%" + cadena + "%' ) ";
-            List<Idea> ideas = ideaDao.listar_condicion_query(q);
+            String tipo = req.getParameter("tipo");
+            String q = "";
+            String json = "";
             Gson gson = new Gson();
-            String json = gson.toJson(ideas);
+            JSONArray array = new JSONArray();
+            if (tipo.equals("idea_r")) {
+                if (!cadena.equals("")) {
+                    q = "from Idea a where (a.nombre like '%" + cadena + "%' or a.descripcion like '%" + cadena + "%' or a.kw like '%" + cadena + "%' ) ";
+                } else {
+                    q = "from Idea a";
+                }
+                List<Idea> ideas = ideaDao.listar_condicion_query(q);
+                json = gson.toJson(ideas);
+                for (Idea i : ideas) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", i.getId());
+                    j.put("nombre", i.getNombre());
+                    j.put("descripcion", i.getDescripcion());
+                    j.put("kw", i.getKw());
+                    j.put("imagen", "/bancoideas/recursos/img/utpl.png");
+                    array.add(j);
+                }
+            } else if (tipo.equals("idea_v")) {
+                if (!cadena.equals("")) {
+                    q = "from Idea a where a.publicar = 1 and (a.nombre like '%" + cadena + "%' or a.descripcion like '%" + cadena + "%' or a.kw like '%" + cadena + "%' ) ";
+                } else {
+                    q = "from Idea a where a.publicar = 1";
+                }
+                List<Idea> ideas = ideaDao.listar_condicion_query(q);
+                json = gson.toJson(ideas);
+                for (Idea i : ideas) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", i.getId());
+                    j.put("nombre", i.getNombre());
+                    j.put("descripcion", i.getDescripcion());
+                    j.put("kw", i.getKw());
+                    j.put("imagen", "/bancoideas/recursos/img/logo.png");
+                    array.add(j);
+                }
+            } else if (tipo.equals("innovador")) {
+                if (!cadena.equals("")) {
+                    q = "from Participante p where p.nombre like '%" + cadena + "%' ";
+                } else {
+                    q = "from Participante p";
+                }
+                List<Participante> participantes = partDao.listar_condicion_query(q);
+                for (Participante p : participantes) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", p.getId());
+                    j.put("nombre", p.getNombre());
+                    j.put("descripcion", p.getUsuario().getCorreo() + "<br/>" + p.getUsuario().getRegister());
+                    j.put("kw", "rol: " + p.getItemCatalogo().getNombre());
+                    j.put("imagen", "/bancoideas/recursos/img/user-profile.png");
+                    array.add(j);
+                }
+                /**
+                 * ********************
+                 */
+                if (!cadena.equals("")) {
+                    q = "from Idea i where i.usuario.nombre like '%" + cadena + "%' ";
+                } else {
+                    q = "from Idea i";
+                }
+                List<Idea> innovadores = ideaDao.listar_condicion_query(q);
+                for (Idea i : innovadores) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", i.getUsuario().getId());
+                    j.put("nombre", i.getUsuario().getNombre());
+                    j.put("descripcion", i.getUsuario().getCorreo() + "<br/>" + i.getUsuario().getRegister());
+                    j.put("kw", "idea: " + i.getNombre());
+                    j.put("imagen", "/bancoideas/recursos/img/user-profile.png");
+                    array.add(j);
+                }
+            } else if (tipo.equals("evaluador")) {
+                if (!cadena.equals("")) {
+                    q = "from ConvocatoriaResponsable cr where cr.usuario.nombre like '%" + cadena + "%' ";
+                } else {
+                    q = "from ConvocatoriaResponsable cr";
+                }
+                List<ConvocatoriaResponsable> evaluadores = convrDao.listar_condicion_query(q);
+                for (ConvocatoriaResponsable cr : evaluadores) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", cr.getId());
+                    j.put("nombre", cr.getUsuario().getNombre());
+                    j.put("descripcion", cr.getUsuario().getCorreo() + "<br/>" + cr.getUsuario().getRegister());
+                    j.put("kw", "convocatoria: " + cr.getConvocatoria().getNombre());
+                    j.put("imagen", "/bancoideas/recursos/img/user-profile.png");
+                    array.add(j);
+                }
+            } else if (tipo.equals("convocatoria")) {
+                if (!cadena.equals("")) {
+                    q = "from Convocatoria c where c.nombre like '%" + cadena + "%' ";
+                } else {
+                    q = "from Convocatoria c";
+                }
+                List<Convocatoria> convocatorias = convDao.listar_condicion_query(q);
+                for (Convocatoria c : convocatorias) {
+                    JSONObject j = new JSONObject();
+                    j.put("id", c.getId());
+                    j.put("nombre", c.getNombre());
+                    j.put("descripcion", "inicio: " + c.getFechaInicio() + "<br/>" + "fin: " + c.getFechaFin());
+                    j.put("kw", c.getDescripcion());
+                    j.put("imagen", c.getImagen());
+                    array.add(j);
+                }
+            }
+            json = gson.toJson(array);
             PrintWriter out = response.getWriter();
             out.print(json);
             out.flush();
@@ -856,7 +1019,7 @@ public class InicioController {
     public String publicar_guardar(Model model, HttpServletRequest req) throws UnsupportedEncodingException, IPersonaESConsultarPorUsloguinBusinessExceptionTypeFaultMessage, IPersonaESConsultarPorIdentificacionBusinessExceptionTypeFaultMessage {
         int idIdea = Integer.parseInt(req.getParameter("id_idea"));
         Idea idea = ideaDao.buscar(idIdea);
-//        idea.setPublicar(Boolean.TRUE);
+        idea.setPublicar(Boolean.TRUE);
         ideaDao.actualizar(idea);
         return "redirect:/publicar.htm?us=" + idea.getUsuario().getId() + "&id_idea=" + idIdea + "&nueva=true&opcion=" + idea.getTipoIdea();
     }
@@ -1160,6 +1323,12 @@ public class InicioController {
             idea.setComentarioEvaluacion(comentario);
             ideaDao.actualizar(idea);
         }
-        return "redirect://principal.htm?us=" + idUs + "&conv=1";
+        int id_conv = -1;
+        try {
+            String fechaActual = format.format(new Date());
+            id_conv = convDao.buscar_id("SELECT convocatoria.id FROM ConvocatoriaResponsable WHERE usuario.id = " + idUs + " AND '" + fechaActual + "' between convocatoria.fechaInicio AND convocatoria.fechaFin");
+        } catch (Exception ex) {
+        }
+        return "redirect://principal.htm?us=" + idUs + "&conv=" + id_conv;
     }
 }

@@ -27,25 +27,29 @@ import org.springframework.web.multipart.MultipartFile;
 public class Utiles {
 
     public String md5(String password) {
-        String original = password;
+        password = "bi/"+password +"?**UTPL"; // password with secret key
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(null).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Utiles.class.getName()).log(Level.SEVERE, null, ex);
         }
-        md.update(original.getBytes());
+        md.update(password.getBytes());
         byte[] digest = md.digest();
         StringBuffer sb = new StringBuffer();
         for (byte b : digest) {
-            sb.append(Integer.toHexString((int) (b & 0xff)));
+            if ((0xff & (b & 0xff)) < 0x10) {
+                sb.append("0" + Integer.toHexString((int) (b & 0xff)));
+            } else {
+                sb.append(Integer.toHexString((int) (b & 0xff)));
+            }
         }
         return sb.toString();
     }
-
+    
     public static void main(String[] args) {
         Utiles u = new Utiles();
-        System.out.println(u.md5("password"));
+        System.out.println(u.md5("ideas"));
     }
 //    private static final String SERVER_UPLOAD_OFERTA_LOCATION_FOLDER = "/Users/utpl/bancoideas/";
     private static final String SERVER_UPLOAD_OFERTA_LOCATION_FOLDER ="/app/glassfish/glassfish4/glassfish/domains/domain1/applications/bancoideas/";

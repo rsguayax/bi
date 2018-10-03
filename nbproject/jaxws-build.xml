@@ -26,37 +26,21 @@
             <isset property="conf.dir"/>
         </condition>
     </target>
-    <target name="wsimport-client-PersonaES" depends="wsimport-init">
-        <mkdir dir="${build.generated.dir}/jax-wsCache/PersonaES"/>
-        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/PersonaES" destdir="${build.generated.dir}/jax-wsCache/PersonaES" wsdl="${basedir}/${conf-dir}xml-resources/web-service-references/PersonaES/wsdl/srv-si-001.utpl.edu.ec_8080/PersonaES.svc.wsdl" catalog="catalog.xml" encoding="${source.encoding}" extension="true" verbose="true" fork="false" wsdlLocation="http://srv-si-001.utpl.edu.ec:8080/PersonaES.svc?wsdl" xnocompile="true" xendorsed="true" package="nsga.persona">
-            <depends file="${basedir}/${conf-dir}xml-resources/web-service-references/PersonaES/wsdl/srv-si-001.utpl.edu.ec_8080/PersonaES.svc.wsdl"/>
-            <produces dir="${build.generated.dir}/jax-wsCache/PersonaES"/>
+    <target name="wsimport-client-person" depends="wsimport-init">
+        <mkdir dir="${build.generated.dir}/jax-wsCache/person"/>
+        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/person" destdir="${build.generated.dir}/jax-wsCache/person" wsdl="${basedir}/${conf-dir}xml-resources/web-service-references/person/wsdl/data.utpl.edu.ec/sga/person.wsdl" catalog="catalog.xml" encoding="${source.encoding}" extension="true" verbose="true" fork="false" wsdlLocation="http://data.utpl.edu.ec/sga/person?wsdl" xnocompile="true" xendorsed="true" package="nsga.persona">
+            <depends file="${basedir}/${conf-dir}xml-resources/web-service-references/person/wsdl/data.utpl.edu.ec/sga/person.wsdl"/>
+            <produces dir="${build.generated.dir}/jax-wsCache/person"/>
         </wsimport>
         <copy todir="${build.generated.sources.dir}/jax-ws">
-            <fileset dir="${build.generated.dir}/jax-wsCache/PersonaES">
+            <fileset dir="${build.generated.dir}/jax-wsCache/person">
                 <include name="**/*.java"/>
             </fileset>
         </copy>
     </target>
-    <target name="wsimport-client-clean-PersonaES" depends="-init-project">
+    <target name="wsimport-client-clean-person" depends="-init-project">
         <delete dir="${build.generated.sources.dir}/jax-ws/nsga/persona"/>
-        <delete dir="${build.generated.dir}/jax-wsCache/PersonaES"/>
+        <delete dir="${build.generated.dir}/jax-wsCache/person"/>
     </target>
-    <target name="wsimport-client-AutenticacionAcademico" depends="wsimport-init">
-        <mkdir dir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico"/>
-        <wsimport sourcedestdir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico" destdir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico" wsdl="${basedir}/${conf-dir}xml-resources/web-service-references/AutenticacionAcademico/wsdl/172.16.50.154/eva/enrol/utpl/lib/syllabus/AutenticacionAcademico.php.wsdl" catalog="catalog.xml" encoding="${source.encoding}" extension="true" verbose="true" fork="false" wsdlLocation="http://172.16.50.154/eva/enrol/utpl/lib/syllabus/AutenticacionAcademico.php?wsdl" xnocompile="true" xendorsed="true" package="eva.auth">
-            <depends file="${basedir}/${conf-dir}xml-resources/web-service-references/AutenticacionAcademico/wsdl/172.16.50.154/eva/enrol/utpl/lib/syllabus/AutenticacionAcademico.php.wsdl"/>
-            <produces dir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico"/>
-        </wsimport>
-        <copy todir="${build.generated.sources.dir}/jax-ws">
-            <fileset dir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico">
-                <include name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="wsimport-client-clean-AutenticacionAcademico" depends="-init-project">
-        <delete dir="${build.generated.sources.dir}/jax-ws/eva/auth"/>
-        <delete dir="${build.generated.dir}/jax-wsCache/AutenticacionAcademico"/>
-    </target>
-    <target name="wsimport-client-generate" depends="wsimport-client-PersonaES, wsimport-client-AutenticacionAcademico"/>
+    <target name="wsimport-client-generate" depends="wsimport-client-person"/>
 </project>

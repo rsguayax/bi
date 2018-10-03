@@ -5,7 +5,7 @@
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
         
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/oc?zeroDateTimeBehavior=convertToNull</property>
+                <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/oc?zeroDateTimeBehavior=convertToNull</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">password</property>
         
@@ -13,15 +13,17 @@
         <property name="hibernate.connection.username">rsguayax</property>
         <property name="hibernate.connection.password">rsg2012</property>-->
         
-        <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.transaction.auto_close_session">true</property>
-        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.c3p0.acquire_increment">1</property>
-        <property name="hibernate.c3p0.idle_test_period">3000</property>
         <property name="hibernate.c3p0.min_size">1</property>
-        <property name="hibernate.c3p0.max_size">5</property>
-        <property name="hibernate.c3p0.max_statements">50</property>
-        <property name="hibernate.c3p0.timeout">1800</property>
+        <property name="hibernate.c3p0.max_size">15</property>
+        <property name="hibernate.c3p0.validate">false</property>
+        <property name="hibernate.c3p0.idle_test_period">30</property><!--Tiempo para comprobar conecciones inactivas y tratar de cerrarlas, valor inferior a timeout-->
+        <property name="hibernate.c3p0.timeout">300</property><!--Tiempo para expulsar conección, mayor a idle_test_period -->
+        <property name="hibernate.c3p0.maxIdleTimeExcessConnections">100</property>
+        <property name="hibernate.c3p0.max_statements">150</property>
+        <property name="hibernate.c3p0.checkoutTimeout">60000</property>
+
         
         <mapping resource="model/Participante.hbm.xml"/>
         <mapping resource="model/RolUsuario.hbm.xml"/>
